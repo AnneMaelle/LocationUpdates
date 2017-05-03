@@ -162,7 +162,8 @@ public class MainActivity extends AppCompatActivity implements
     DirectionsStep[] mySteps;
     DirectionsStep currentStep;
     EncodedPolyline myPolylines;
-    List<com.google.android.gms.maps.model.LatLng> positions;
+    Vector<com.google.android.gms.maps.model.LatLng> positions = new Vector<com.google.android.gms.maps.model.LatLng>() {
+    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -241,7 +242,7 @@ public class MainActivity extends AppCompatActivity implements
         request.setCallback(callback);
 
         try {
-            Thread.sleep(10000);
+            Thread.sleep(2000);
         } catch (Exception e) {
         }
 
@@ -648,6 +649,7 @@ public class MainActivity extends AppCompatActivity implements
             polyOpt.add(myLatLng);
         }
         myMap.addPolyline(polyOpt);
+        myMap.setMyLocationEnabled(true);
     }
 
 }
