@@ -161,7 +161,8 @@ public class MainActivity extends AppCompatActivity implements
     DirectionsLeg[] myLegs;
     DirectionsStep[] mySteps;
     DirectionsStep currentStep;
-    EncodedPolyline[] myPolylines;
+    EncodedPolyline myPolylines;
+    List<com.google.android.gms.maps.model.LatLng> positions;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -213,13 +214,13 @@ public class MainActivity extends AppCompatActivity implements
                                 System.out.println("route " + r + " : " + myRoutes[r].summary);
                                 DirectionsRoute dr = myRoutes[r];
                                 myLegs = dr.legs;
+                                myPolylines = myRoutes[r].overviewPolyline;
+                                System.out.println("\t\tpolylines "  + " : " + myPolylines);
                                 for (int l = 0; l < myLegs.length; l++) {
                                     System.out.println("\tleg " + l + " : " + myLegs[l].startAddress + " - " + myLegs[l].endAddress);
                                     mySteps = myLegs[l].steps;
                                     for (int s = 0; s < mySteps.length; s++) {
-                                        myPolylines[s] = mySteps[s].polyline;
                                         System.out.println("\t\tstep " + s + " : " + mySteps[s].duration);
-                                        System.out.println("\t\tpolylines " + s + " : " + myPolylines[s]);
                                     }
                                 }
                             }
@@ -639,13 +640,12 @@ public class MainActivity extends AppCompatActivity implements
     public void onMapReady(GoogleMap map){
         myMap = map;
         PolylineOptions polyOpt = new PolylineOptions();
-        for (int s = 0; s < myPolylines.length; s++) {
-            List<LatLng> poly = myPolylines[s].decodePath();
-            for (int i = 0; s < poly.size();i++){
-                com.google.android.gms.maps.model.LatLng myLatLng= new com.google.android.gms.maps.model.LatLng(poly.get(i).lat,poly.get(i).lng);
-                polyOpt.add(myLatLng);
-            }
-
+        List<LatLng> poly = myPolylines.decodePath();
+        for (int i = 0; i < poly.size();i++){
+            com.google.android.gms.maps.model.LatLng myLatLng= new com.google.android.gms.maps.model.LatLng(poly.get(i).lat,poly.get(i).lng);
+            positions.add(myLatLng);
+            System.out.println("\t\tLatLng " + i + " : " + myLatLng);
+            polyOpt.add(myLatLng);
         }
         myMap.addPolyline(polyOpt);
     }
