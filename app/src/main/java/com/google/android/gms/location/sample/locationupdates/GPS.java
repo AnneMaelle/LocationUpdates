@@ -69,13 +69,13 @@ import static java.lang.Math.abs;
  * to invoke a dialog without requiring the developer to understand which settings are needed for
  * different Location requirements.
  */
-public class MainActivity extends AppCompatActivity implements
+public class GPS extends AppCompatActivity implements
         ConnectionCallbacks,
         OnConnectionFailedListener,
         LocationListener,
         OnMapReadyCallback {
 
-    protected static final String TAG = "MainActivity";
+    protected static final String TAG = "GPS";
 
     /**
      * Constant used in the location settings dialog.
@@ -154,8 +154,8 @@ public class MainActivity extends AppCompatActivity implements
     protected String mLastUpdateTime;
 
     // Itinéraire
-    private String origin;
-    private String destination;
+    private String origin = "Toronto";
+    private String destination = "Montreal";
     DirectionsResult myResult;
     DirectionsRoute[] myRoutes;
     DirectionsLeg[] myLegs;
@@ -166,15 +166,15 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main_activity);
+        setContentView(R.layout.activity_gps);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        // Récupération des points de départ et arrivée pour l'itinéraire.
+/**        // Récupération des points de départ et arrivée pour l'itinéraire.
         Intent myIntent = getIntent();
-        origin = myIntent.getStringExtra("Départ");
+        origin = myIntent.getStringExtra("Origine");
         destination = myIntent.getStringExtra("Destination");
-
+*/
         // Locate the UI widgets.
         mStartUpdatesButton = (Button) findViewById(R.id.start_updates_button);
         mStopUpdatesButton = (Button) findViewById(R.id.stop_updates_button);
@@ -404,7 +404,7 @@ public class MainActivity extends AppCompatActivity implements
                     case LocationSettingsStatusCodes.SUCCESS:
                         Log.i(TAG, "All location settings are satisfied.");
                         LocationServices.FusedLocationApi.requestLocationUpdates(
-                                mGoogleApiClient, mLocationRequest, MainActivity.this);
+                                mGoogleApiClient, mLocationRequest, GPS.this);
                         break;
                     case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
                         Log.i(TAG, "Location settings are not satisfied. Attempting to upgrade " +
@@ -412,7 +412,7 @@ public class MainActivity extends AppCompatActivity implements
                         try {
                             // Show the dialog by calling startResolutionForResult(), and check the
                             // result in onActivityResult().
-                            status.startResolutionForResult(MainActivity.this, REQUEST_CHECK_SETTINGS);
+                            status.startResolutionForResult(GPS.this, REQUEST_CHECK_SETTINGS);
                         } catch (IntentSender.SendIntentException e) {
                             Log.i(TAG, "PendingIntent unable to execute request.");
                         }
@@ -421,7 +421,7 @@ public class MainActivity extends AppCompatActivity implements
                         String errorMessage = "Location settings are inadequate, and cannot be " +
                                 "fixed here. Fix in Settings.";
                         Log.e(TAG, errorMessage);
-                        Toast.makeText(MainActivity.this, errorMessage, Toast.LENGTH_LONG).show();
+                        Toast.makeText(GPS.this, errorMessage, Toast.LENGTH_LONG).show();
                         mRequestingLocationUpdates = false;
                 }
                 updateUI();

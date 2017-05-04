@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Itineraire"
+    android:background="@color/colorPrimary">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/itinerary_toolbar"
+        android:minHeight="?attr/actionBarSize"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimaryDark">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="ITINERAIRE"
+            android:textColor="#000000"
+            android:textSize="30dp"
+            android:layout_marginLeft="50dp" />
+    </android.support.v7.widget.Toolbar>
+
+    <ImageView
+        android:id="@+id/backgroundDeco"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true" />
+
+    <ImageView
+        android:id="@+id/favoritesButton"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginLeft="70dp"
+        android:layout_marginTop="60dp"
+        android:clickable="true" />
+
+    <TextView
+        android:id="@+id/favoritesText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="MES FAVORIS"
+        android:textColor="#000000"
+        android:layout_below="@+id/favoritesButton"
+        android:textSize="20dp"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="40dp" />
+
+    <ImageView
+        android:id="@+id/historyButton"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignTop="@+id/favoritesButton"
+        android:clickable="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="70dp" />
+
+    <TextView
+        android:id="@+id/historyText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="HISTORIQUE"
+        android:textColor="#000000"
+        android:layout_below="@+id/historyButton"
+        android:textSize="20dp"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="40dp" />
+
+    <TextView
+        android:id="@+id/fromText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="DEPART"
+        android:textSize="20dp"
+        android:textColor="#000000"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="200dp"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="50dp" />
+
+    <EditText
+        android:id="@+id/from"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/fromText"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginStart="50dp"
+        android:layout_marginEnd="50dp" />
+
+    <TextView
+        android:id="@+id/toText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/fromText"
+        android:text="ARRIVEE"
+        android:textSize="20dp"
+        android:textColor="#000000"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="50dp"
+        android:layout_marginTop="80dp" />
+
+    <EditText
+        android:id="@+id/to"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/toText"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginStart="50dp"
+        android:layout_marginEnd="50dp" />
+
+    <Button
+        android:id="@+id/continueButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/to"
+        android:background="@color/colorPrimary"
+        android:text="Continuer sans itinéraire"
+        android:textStyle="normal"
+        android:textSize="10dp"
+        android:onClick="goNoItineraryGPS"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="50dp" />
+
+    <Button
+        android:id="@+id/letsGoButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/backgroundDeco"
+        android:text="Go"
+        android:onClick="goGPS"
+        android:layout_alignRight="@+id/to"
+        android:layout_marginBottom="10dp" />
+
+</RelativeLayout>
