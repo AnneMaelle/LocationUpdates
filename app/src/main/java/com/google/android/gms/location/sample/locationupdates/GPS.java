@@ -154,8 +154,8 @@ public class MainActivity extends AppCompatActivity implements
     protected String mLastUpdateTime;
 
     // Itinéraire
-    private String origin = "Toronto";
-    private String destination = "Montreal";
+    private String origin;
+    private String destination;
     DirectionsResult myResult;
     DirectionsRoute[] myRoutes;
     DirectionsLeg[] myLegs;
@@ -170,6 +170,10 @@ public class MainActivity extends AppCompatActivity implements
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        // Récupération des points de départ et arrivée pour l'itinéraire.
+        Intent myIntent = getIntent();
+        origin = myIntent.getStringExtra("Départ");
+        destination = myIntent.getStringExtra("Destination");
 
         // Locate the UI widgets.
         mStartUpdatesButton = (Button) findViewById(R.id.start_updates_button);
