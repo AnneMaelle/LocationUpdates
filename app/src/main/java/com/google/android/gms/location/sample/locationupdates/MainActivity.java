@@ -161,9 +161,9 @@ public class MainActivity extends AppCompatActivity implements
     DirectionsLeg[] myLegs;
     DirectionsStep[] mySteps;
     DirectionsStep currentStep;
-    EncodedPolyline myPolylines;
-    Vector<com.google.android.gms.maps.model.LatLng> positions = new Vector<com.google.android.gms.maps.model.LatLng>() {
-    };
+    EncodedPolyline[] myPolylines;
+    String[] instructions;
+    Vector<com.google.android.gms.maps.model.LatLng> positions = new Vector<>();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -215,13 +215,16 @@ public class MainActivity extends AppCompatActivity implements
                                 System.out.println("route " + r + " : " + myRoutes[r].summary);
                                 DirectionsRoute dr = myRoutes[r];
                                 myLegs = dr.legs;
-                                myPolylines = myRoutes[r].overviewPolyline;
-                                System.out.println("\t\tpolylines "  + " : " + myPolylines);
                                 for (int l = 0; l < myLegs.length; l++) {
                                     System.out.println("\tleg " + l + " : " + myLegs[l].startAddress + " - " + myLegs[l].endAddress);
                                     mySteps = myLegs[l].steps;
+                                    myPolylines = new EncodedPolyline[mySteps.length];
+                                    instructions = new String[mySteps.length];
                                     for (int s = 0; s < mySteps.length; s++) {
                                         System.out.println("\t\tstep " + s + " : " + mySteps[s].duration);
+                                        myPolylines[s] = mySteps[s].polyline;
+                                        System.out.println("\t\tpolylines "  + " : " + myPolylines[s]);
+                                        instructions[s] = mySteps[s].htmlInstructions;
                                     }
                                 }
                             }
@@ -234,9 +237,7 @@ public class MainActivity extends AppCompatActivity implements
                     @Override
                     public void onFailure(Throwable e) {
                         // Handle error.
-                        Context context1 = getApplicationContext();
-                        CharSequence text = ("Ça ne marche pas");
-                        int durationToast = Toast.LENGTH_SHORT;
+                        System.out.println("\t\tonFailure "+ e );
                     }
                 };
         request.setCallback(callback);
@@ -460,7 +461,7 @@ public class MainActivity extends AppCompatActivity implements
             mLatitudeTextView.setText(String.format("%s: %f", mLatitudeLabel, mCurrentLocation.getLatitude()));
             mLongitudeTextView.setText(String.format("%s: %f", mLongitudeLabel, mCurrentLocation.getLongitude()));
             mLastUpdateTimeTextView.setText(String.format("%s: %s", mLastUpdateTimeLabel, mLastUpdateTime));
-            mSpeedTextView.setText(String.format("%s: %s",mSpeedLabel,currentSpeed));
+            mSpeedTextView.setText(String.format("%s: %s"+" km/h",mSpeedLabel,currentSpeed));
         }
     }
 
@@ -488,7 +489,6 @@ public class MainActivity extends AppCompatActivity implements
         super.onStart();
         mGoogleApiClient.connect();
     }
-
     @Override
     public void onResume() {
         super.onResume();
@@ -500,7 +500,6 @@ public class MainActivity extends AppCompatActivity implements
         }
         updateUI();
     }
-
     @Override
     protected void onPause() {
         super.onPause();
@@ -509,7 +508,6 @@ public class MainActivity extends AppCompatActivity implements
             stopLocationUpdates();
         }
     }
-
     @Override
     protected void onStop() {
         super.onStop();
@@ -616,13 +614,11 @@ public class MainActivity extends AppCompatActivity implements
         } else {
             double distance = calculationByDistance(newLat,newLon,oldLat,oldLon);
             double timeDifferent = newTime - currentTime;
-            currentSpeed = distance/timeDifferent;
+            currentSpeed = distance*3.6/timeDifferent;
             currentTime = newTime;
             oldLocation = location;
             double diffLat = abs(newLat-oldLat);
             double diffLong = abs(newLon-oldLon);
-            System.out.println("\t\tspeed /diff" + diffLat + " ,"+diffLong );
-            System.out.println("\t\tspeed / distance " + distance);
             System.out.println("\t\tspeed " + currentSpeed);
             }
     }
@@ -641,12 +637,15 @@ public class MainActivity extends AppCompatActivity implements
     public void onMapReady(GoogleMap map){
         myMap = map;
         PolylineOptions polyOpt = new PolylineOptions();
-        List<LatLng> poly = myPolylines.decodePath();
-        for (int i = 0; i < poly.size();i++){
-            com.google.android.gms.maps.model.LatLng myLatLng= new com.google.android.gms.maps.model.LatLng(poly.get(i).lat,poly.get(i).lng);
-            positions.add(myLatLng);
-            System.out.println("\t\tLatLng " + i + " : " + myLatLng);
-            polyOpt.add(myLatLng);
+
+        for (int s=0; s<myPolylines.length;s++) {
+
+            List<LatLng> poly = myPolylines[s].decodePath();
+            for (int i = 0; i < poly.size(); i++) {
+                com.google.android.gms.maps.model.LatLng myLatLng = new com.google.android.gms.maps.model.LatLng(poly.get(i).lat, poly.get(i).lng);
+                positions.add(myLatLng);
+                polyOpt.add(myLatLng);
+            }
         }
         myMap.addPolyline(polyOpt);
         myMap.setMyLocationEnabled(true);
