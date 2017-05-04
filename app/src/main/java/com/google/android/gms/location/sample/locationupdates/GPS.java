@@ -255,10 +255,6 @@ public class GPS extends AppCompatActivity implements
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        //Création du troncon
-        float d = (float) calculationByDistance(trajetPredit.get(trajetPredit.size()).latitude, trajetPredit.get(trajetPredit.size()).longitude, trajetPredit.get(0).latitude, trajetPredit.get(0).longitude);
-        t = new Troncon(0, d, 90, 70, 110, trajetPredit);
-
     }
 
     /**
@@ -642,6 +638,7 @@ public class GPS extends AppCompatActivity implements
 
         for (int s=0; s<myPolylines.length;s++) {
 
+            System.out.println("\t\ttrajet boucle for 1"+s);
             List<LatLng> poly = myPolylines[s].decodePath();
             for (int i = 0; i < poly.size(); i++) {
                 com.google.android.gms.maps.model.LatLng myLatLng = new com.google.android.gms.maps.model.LatLng(poly.get(i).lat, poly.get(i).lng);
@@ -651,6 +648,11 @@ public class GPS extends AppCompatActivity implements
         }
         myMap.addPolyline(polyOpt);
         myMap.setMyLocationEnabled(true);
+
+        //Création du troncon
+        System.out.println("\t\ttrajetPredit"  + " : " + trajetPredit.size());
+        float d = (float) calculationByDistance(trajetPredit.get(trajetPredit.size()-1).latitude, trajetPredit.get(trajetPredit.size()-1).longitude, trajetPredit.get(0).latitude, trajetPredit.get(0).longitude);
+        t = new Troncon(0, d, 90, 70, 110, trajetPredit);
     }
 
     public void positionConducteur(){

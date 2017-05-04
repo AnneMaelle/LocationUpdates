@@ -57,11 +57,11 @@ public class Troncon {
                 double T2 = (double) (dTroncon -(vlim*vlim-v2*v2)/(2*a2)+Math.pow(vlim-v0, 2)/(2*a0))/vlim;
                 double d2 = (double) (vlim*(T2-T1)+d1);
                 while (d < d2){
-                    d += Math.acos (Math.sin(positionsConnues.get(indice1).latitude)*
-                            Math.sin(positionsConnues.get(indice1 + 1).latitude)
-                            + Math.cos(positionsConnues.get(indice1).latitude) *
-                            Math.cos (positionsConnues.get(indice1 + 1).latitude)*
-                            Math.cos (positionsConnues.get(indice1 + 1).longitude-positionsConnues.get(indice1).longitude));
+                    d += Math.acos (Math.sin(positionsConnues.get(indice2).latitude)*
+                            Math.sin(positionsConnues.get(indice2 + 1).latitude)
+                            + Math.cos(positionsConnues.get(indice2).latitude) *
+                            Math.cos (positionsConnues.get(indice2 + 1).latitude)*
+                            Math.cos (positionsConnues.get(indice2 + 1).longitude-positionsConnues.get(indice2).longitude));
                     indice2++;
                 }
             }
