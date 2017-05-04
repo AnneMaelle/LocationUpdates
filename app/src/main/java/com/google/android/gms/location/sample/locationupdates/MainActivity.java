@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.location.Location;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -38,7 +37,6 @@ import com.google.android.gms.maps.model.*;
 import com.google.maps.DirectionsApi;
 import com.google.maps.DirectionsApiRequest;
 import com.google.maps.GeoApiContext;
-import com.google.maps.PendingResult;
 import com.google.maps.PendingResult.Callback;
 import com.google.maps.model.*;
 import com.google.maps.model.LatLng;
@@ -46,10 +44,10 @@ import com.google.maps.model.LatLng;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Vector;
 
 import static java.lang.Math.abs;
+
 
 /**
  * Using location settings.
@@ -121,10 +119,9 @@ public class MainActivity extends AppCompatActivity implements
     protected Location mCurrentLocation;
     protected Location oldLocation = new Location("me");
     protected double currentSpeed = 0.0;
+    protected double oldSpeed = 0.0;
     protected double currentTime = 0.0;
     double EARTH_RADIUS = 6367.45;
-
-
 
     // UI Widgets.
     protected Button mStartUpdatesButton;
@@ -163,7 +160,10 @@ public class MainActivity extends AppCompatActivity implements
     DirectionsStep currentStep;
     EncodedPolyline[] myPolylines;
     String[] instructions;
-    Vector<com.google.android.gms.maps.model.LatLng> positions = new Vector<>();
+    Vector<com.google.android.gms.maps.model.LatLng> trajetPredit = new Vector<>();
+    Troncon t;
+
+    int indiceDernierePos = 0;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -250,6 +250,10 @@ public class MainActivity extends AppCompatActivity implements
         //Création de la map
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        //Création du troncon
+        float d = (float) calculationByDistance(trajetPredit.get(trajetPredit.size()).latitude, trajetPredit.get(trajetPredit.size()).longitude, trajetPredit.get(0).latitude, trajetPredit.get(0).longitude);
+        t = new Troncon(0, d, 90, 70, 110, trajetPredit);
 
     }
 
@@ -607,20 +611,14 @@ public class MainActivity extends AppCompatActivity implements
         double oldLat = oldLocation.getLatitude();
         double oldLon = oldLocation.getLongitude();
 
-        if(location.hasSpeed()){
-            currentSpeed = location.getSpeed();
-            System.out.println("\t\tspeed " + "hasSpeed");
-
-        } else {
-            double distance = calculationByDistance(newLat,newLon,oldLat,oldLon);
-            double timeDifferent = newTime - currentTime;
-            currentSpeed = distance*3.6/timeDifferent;
-            currentTime = newTime;
-            oldLocation = location;
-            double diffLat = abs(newLat-oldLat);
-            double diffLong = abs(newLon-oldLon);
-            System.out.println("\t\tspeed " + currentSpeed);
-            }
+        double distance = calculationByDistance(newLat,newLon,oldLat,oldLon);
+        double timeDifferent = newTime - currentTime;
+        currentSpeed = distance*3.6/timeDifferent;
+        currentTime = newTime;
+        oldLocation = location;
+        double diffLat = abs(newLat-oldLat);
+        double diffLong = abs(newLon-oldLon);
+        System.out.println("\t\tspeed " + currentSpeed);
     }
     public double calculationByDistance(double lat1, double long1, double lat2, double long2){
         double dLat = Math.toRadians(lat2 - lat1);
@@ -643,12 +641,74 @@ public class MainActivity extends AppCompatActivity implements
             List<LatLng> poly = myPolylines[s].decodePath();
             for (int i = 0; i < poly.size(); i++) {
                 com.google.android.gms.maps.model.LatLng myLatLng = new com.google.android.gms.maps.model.LatLng(poly.get(i).lat, poly.get(i).lng);
-                positions.add(myLatLng);
+                trajetPredit.add(myLatLng);
                 polyOpt.add(myLatLng);
             }
         }
         myMap.addPolyline(polyOpt);
         myMap.setMyLocationEnabled(true);
+    }
+
+    public void positionConducteur(){
+        int i = 0;
+        double epsilon = (double) 3*10/36;
+        int  conseil = 9;
+        while (indiceDernierePos < trajetPredit.size()) {
+
+            double distanceEntreDeuxPointsConnus = calculationByDistance(trajetPredit.get(indiceDernierePos).latitude, trajetPredit.get(indiceDernierePos).longitude,
+                    trajetPredit.get(indiceDernierePos + 1).latitude,trajetPredit.get(indiceDernierePos + 1).longitude);
+            double distancePos = calculationByDistance(trajetPredit.get(indiceDernierePos).latitude, trajetPredit.get(indiceDernierePos).longitude,
+                    mCurrentLocation.getLatitude(),mCurrentLocation.getLongitude());
+
+            if (distanceEntreDeuxPointsConnus < distancePos) {
+                while (distanceEntreDeuxPointsConnus<distancePos){
+                    indiceDernierePos ++;
+                    distanceEntreDeuxPointsConnus += calculationByDistance(trajetPredit.get(indiceDernierePos).latitude, trajetPredit.get(indiceDernierePos).longitude,
+                            trajetPredit.get(indiceDernierePos + 1).latitude,trajetPredit.get(indiceDernierePos + 1).longitude);
+                }
+            }
+
+            oldSpeed = currentSpeed;
+            currentSpeed = distancePos/10;
+            conseil = t.conseil(currentSpeed, oldSpeed, indiceDernierePos, epsilon);
+            this.donnerConseil(conseil);
+
+            try {
+                Thread.sleep(10000);
+            } catch (Exception e) {
+            }
+
+        }
+
+    }
+
+    public void donnerConseil(int conseil){
+        Context context = getApplicationContext();
+        // à compléter : conditions
+        if (conseil == -3 | conseil == -2){
+            Toast toast = Toast.makeText(context, "Levez le pied", Toast.LENGTH_LONG);
+            toast.show();
+        }
+
+        if (conseil == -1){
+            Toast toast = Toast.makeText(context, "Accélerez", Toast.LENGTH_LONG);
+            toast.show();
+        }
+
+        if (conseil == 1){
+            Toast toast = Toast.makeText(context, "Ralentissez", Toast.LENGTH_LONG);
+            toast.show();
+        }
+
+        if (conseil == 2 | conseil == 3){
+            Toast toast = Toast.makeText(context, "Appuyez sur l'accélérateur", Toast.LENGTH_LONG);
+            toast.show();
+        }
+
+        if (conseil == 0){
+            Toast toast = Toast.makeText(context, "C'est parfait", Toast.LENGTH_LONG);
+            toast.show();
+        }
     }
 
 }
