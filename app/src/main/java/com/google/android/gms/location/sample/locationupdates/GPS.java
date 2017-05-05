@@ -172,11 +172,11 @@ public class GPS extends AppCompatActivity implements
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-/**        // Récupération des points de départ et arrivée pour l'itinéraire.
+        // Récupération des points de départ et arrivée pour l'itinéraire.
         Intent myIntent = getIntent();
         origin = myIntent.getStringExtra("Origine");
         destination = myIntent.getStringExtra("Destination");
-*/
+
         // Locate the UI widgets.
         mStartUpdatesButton = (Button) findViewById(R.id.start_updates_button);
         mStopUpdatesButton = (Button) findViewById(R.id.stop_updates_button);
@@ -254,6 +254,11 @@ public class GPS extends AppCompatActivity implements
         //Création de la map
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        try {
+            Thread.sleep(10000);
+        } catch (Exception e) {
+        }
 
     }
 
@@ -557,6 +562,7 @@ public class GPS extends AppCompatActivity implements
         com.google.android.gms.maps.model.LatLng loc = new com.google.android.gms.maps.model.LatLng(mCurrentLocation.getLatitude(),mCurrentLocation.getLongitude());
         myMap.addMarker(new MarkerOptions().position(loc).title("A"));
         myMap.moveCamera(CameraUpdateFactory.newLatLngZoom(loc, 17));
+        positionConducteur();
         updateLocationUI();
     }
 
@@ -638,7 +644,6 @@ public class GPS extends AppCompatActivity implements
 
         for (int s=0; s<myPolylines.length;s++) {
 
-            System.out.println("\t\ttrajet boucle for 1"+s);
             List<LatLng> poly = myPolylines[s].decodePath();
             for (int i = 0; i < poly.size(); i++) {
                 com.google.android.gms.maps.model.LatLng myLatLng = new com.google.android.gms.maps.model.LatLng(poly.get(i).lat, poly.get(i).lng);
@@ -659,20 +664,22 @@ public class GPS extends AppCompatActivity implements
         int i = 0;
         double epsilon = (double) 3*10/36;
         int  conseil = 9;
-        while (indiceDernierePos < trajetPredit.size()) {
+        //while (indiceDernierePos < trajetPredit.size()) {
 
             double distanceEntreDeuxPointsConnus = calculationByDistance(trajetPredit.get(indiceDernierePos).latitude, trajetPredit.get(indiceDernierePos).longitude,
                     trajetPredit.get(indiceDernierePos + 1).latitude,trajetPredit.get(indiceDernierePos + 1).longitude);
             double distancePos = calculationByDistance(trajetPredit.get(indiceDernierePos).latitude, trajetPredit.get(indiceDernierePos).longitude,
                     mCurrentLocation.getLatitude(),mCurrentLocation.getLongitude());
+            System.out.println("\t\tdistancePos"  + " : " + distancePos);
 
             if (distanceEntreDeuxPointsConnus < distancePos) {
                 while (distanceEntreDeuxPointsConnus<distancePos){
                     indiceDernierePos ++;
                     distanceEntreDeuxPointsConnus += calculationByDistance(trajetPredit.get(indiceDernierePos).latitude, trajetPredit.get(indiceDernierePos).longitude,
                             trajetPredit.get(indiceDernierePos + 1).latitude,trajetPredit.get(indiceDernierePos + 1).longitude);
+                    System.out.println("\t\tdistanceEntreDeuxPoints"  + " : " + distanceEntreDeuxPointsConnus);
                 }
-            }
+        //    }
 
             oldSpeed = currentSpeed;
             currentSpeed = distancePos/10;

@@ -11,42 +11,51 @@ import java.util.Vector;
 public class Troncon {
 
     public int indice;
-    float dTroncon, vlim, v0, v2; //paramètres à récupérer grâce à l'API <google Maps
-    float Kc; //constante du véhicule
-    float a0, a2; //accélaration calcuclée par optimisation
-    int indice1, indice2;
-    Vector<LatLng> positionsConnues;
-    int pas = 10; //pas de temps en s
-    float EIdeal, EReel; //CO2 rejeté
-    float noteCO2, noteVar;
+    private float dTroncon, vlim, v0, v2; //paramètres à récupérer grâce à l'API <google Maps
+    private float Kc; //constante du véhicule
+    private float a0, a2; //accélaration calcuclée par optimisation
+    private int indice1, indice2;
+    private float pas;
+    public Vector<LatLng> positionsConnues;
+    public float EIdeal, EReel; //CO2 rejeté
+    public float noteCO2, noteVar;
 
-    public Troncon(int i, float d, float vitLim, float vit0, float vit2, Vector<LatLng> positions){
+    public Troncon(int i, float d, float vitLim, float vit0, float vit2, Vector<LatLng> positions) {
         indice = i;
         dTroncon = d;
         vlim = vitLim;
         v0 = vit0;
         v2 = vit2;
         Kc = (float) 1;
-        a0 = (vlim-v0)/30;
-        a2 = (vlim - v2)/30;
+        a0 = (vlim - v0) / 30;
+        a2 = (vlim - v2) / 30;
         positionsConnues = positions;
         this.profilDeVitesse();
         this.calculEIdeal();
     }
 
+    public double calculationByDistance(double lat1, double long1, double lat2, double long2){
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLon = Math.toRadians(long2 - long1);
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+                + Math.cos(Math.toRadians(lat1))
+                * Math.cos(Math.toRadians(lat2)) * Math.sin(dLon / 2)
+                * Math.sin(dLon / 2);
+        double c = 2 * Math.asin(Math.sqrt(a));
+        long distanceInMeters = Math.round(6371000 * c);
+        return distanceInMeters;
+    }
+
     private void profilDeVitesse(){
         if (v0<vlim){
             double T1 = (double) (vlim-v0)/a0;
-            double d1 = (double) (0.5*a0*T1*T1 + v0*T1);
+            double d1 = (0.5*a0*T1*T1 + v0*T1);
             double d = 0;
             indice1 = 0;
-            while (d < d1){
+            while (d < d1 && indice1 < positionsConnues.size()){
 
-                d += Math.acos (Math.sin(positionsConnues.get(indice1).latitude)*
-                        Math.sin(positionsConnues.get(indice1 + 1).latitude)
-                        + Math.cos(positionsConnues.get(indice1).latitude) *
-                        Math.cos (positionsConnues.get(indice1 + 1).latitude)*
-                        Math.cos (positionsConnues.get(indice1 + 1).longitude-positionsConnues.get(indice1).longitude));
+                d += calculationByDistance(positionsConnues.get(indice1).latitude, positionsConnues.get(indice1).longitude,
+                        positionsConnues.get(indice1 + 1).latitude, positionsConnues.get(indice1 + 1).longitude);
                 indice1++;
             }
             if (v2 > vlim){
@@ -56,12 +65,9 @@ public class Troncon {
                 int indice2 = indice1;
                 double T2 = (double) (dTroncon -(vlim*vlim-v2*v2)/(2*a2)+Math.pow(vlim-v0, 2)/(2*a0))/vlim;
                 double d2 = (double) (vlim*(T2-T1)+d1);
-                while (d < d2){
-                    d += Math.acos (Math.sin(positionsConnues.get(indice2).latitude)*
-                            Math.sin(positionsConnues.get(indice2 + 1).latitude)
-                            + Math.cos(positionsConnues.get(indice2).latitude) *
-                            Math.cos (positionsConnues.get(indice2 + 1).latitude)*
-                            Math.cos (positionsConnues.get(indice2 + 1).longitude-positionsConnues.get(indice2).longitude));
+                while (d < d2 && indice2 < positionsConnues.size()){
+                    d += calculationByDistance(positionsConnues.get(indice2).latitude, positionsConnues.get(indice2).longitude,
+                            positionsConnues.get(indice2 + 1).latitude, positionsConnues.get(indice2 + 1).longitude);
                     indice2++;
                 }
             }
@@ -72,12 +78,9 @@ public class Troncon {
                 double d2 = vlim * T2;
                 double d = 0;
                 int indice2 = 0;
-                while (d < d2){
-                    d += Math.acos (Math.sin(positionsConnues.get(indice1).latitude)*
-                            Math.sin(positionsConnues.get(indice1 + 1).latitude)
-                            + Math.cos(positionsConnues.get(indice1).latitude) *
-                            Math.cos (positionsConnues.get(indice1 + 1).latitude)*
-                            Math.cos (positionsConnues.get(indice1 + 1).longitude-positionsConnues.get(indice1).longitude));
+                while (d < d2 && indice2 < positionsConnues.size()){
+                    d += calculationByDistance(positionsConnues.get(indice2).latitude, positionsConnues.get(indice2).longitude,
+                            positionsConnues.get(indice2 + 1).latitude, positionsConnues.get(indice2 + 1).longitude);
                     indice2++;
                 }
             } else {
@@ -205,3 +208,4 @@ public class Troncon {
     }
 
 }
+
