@@ -117,6 +117,7 @@ public class GPS extends AppCompatActivity implements
      * Represents a geographical location.
      */
     protected Location mCurrentLocation;
+    protected LatLng originLoc;
     protected Location oldLocation = new Location("me");
     protected double currentSpeed = 0.0;
     protected double oldSpeed = 0.0;
@@ -172,11 +173,6 @@ public class GPS extends AppCompatActivity implements
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        // Récupération des points de départ et arrivée pour l'itinéraire.
-        Intent myIntent = getIntent();
-        origin = myIntent.getStringExtra("Origine");
-        destination = myIntent.getStringExtra("Destination");
-
         // Locate the UI widgets.
         mStartUpdatesButton = (Button) findViewById(R.id.start_updates_button);
         mStopUpdatesButton = (Button) findViewById(R.id.stop_updates_button);
@@ -204,10 +200,15 @@ public class GPS extends AppCompatActivity implements
         createLocationRequest();
         buildLocationSettingsRequest();
 
+        // Récupération des points de départ et arrivée pour l'itinéraire.
+        Intent myIntent = getIntent();
+        origin = myIntent.getStringExtra("Origine");
+        //originLoc = new LatLng(mCurrentLocation.getLatitude(),mCurrentLocation.getLongitude());
+        destination = myIntent.getStringExtra("Destination");
+
         //Crée la requête d'itinéraire
         GeoApiContext context = new GeoApiContext().setApiKey(getResources().getString(R.string.google_maps_directions));
         DirectionsApiRequest request = DirectionsApi.newRequest(context).origin(origin).destination(destination);
-
         // Envoie la requête de manière Asynchrone et stocke les résultats
         Callback<DirectionsResult> callback = new Callback<DirectionsResult>() {
                     @Override
@@ -664,11 +665,9 @@ public class GPS extends AppCompatActivity implements
         int i = 0;
         double epsilon = (double) 3*10/36;
         int  conseil = 9;
-        //while (indiceDernierePos < trajetPredit.size()) {
 
-            double distanceEntreDeuxPointsConnus = calculationByDistance(trajetPredit.get(indiceDernierePos).latitude, trajetPredit.get(indiceDernierePos).longitude,
+
                     trajetPredit.get(indiceDernierePos + 1).latitude,trajetPredit.get(indiceDernierePos + 1).longitude);
-            double distancePos = calculationByDistance(trajetPredit.get(indiceDernierePos).latitude, trajetPredit.get(indiceDernierePos).longitude,
                     mCurrentLocation.getLatitude(),mCurrentLocation.getLongitude());
             System.out.println("\t\tdistancePos"  + " : " + distancePos);
 
@@ -677,10 +676,9 @@ public class GPS extends AppCompatActivity implements
                     indiceDernierePos ++;
                     distanceEntreDeuxPointsConnus += calculationByDistance(trajetPredit.get(indiceDernierePos).latitude, trajetPredit.get(indiceDernierePos).longitude,
                             trajetPredit.get(indiceDernierePos + 1).latitude,trajetPredit.get(indiceDernierePos + 1).longitude);
-                    System.out.println("\t\tdistanceEntreDeuxPoints"  + " : " + distanceEntreDeuxPointsConnus);
                 }
-        //    }
 
+            oldLocation = mCurrentLocation;
             oldSpeed = currentSpeed;
             currentSpeed = distancePos/10;
             conseil = t.conseil(currentSpeed, oldSpeed, indiceDernierePos, epsilon);
@@ -690,11 +688,9 @@ public class GPS extends AppCompatActivity implements
                 Thread.sleep(10000);
             } catch (Exception e) {
             }
-
         }
 
     }
-
     public void donnerConseil(int conseil){
         Context context = getApplicationContext();
         // à compléter : conditions
