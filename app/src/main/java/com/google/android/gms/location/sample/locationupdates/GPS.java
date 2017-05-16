@@ -152,8 +152,11 @@ public class GPS extends AppCompatActivity implements
     protected String mLastUpdateTime;
 
     // Itinéraire
-    private String origin = "Toronto";
-    private String destination = "Montreal";
+    private String origin = "Metz";
+    private String destination = "Paris";
+
+    boolean originGiven = true;
+
     DirectionsResult myResult;
     DirectionsRoute[] myRoutes;
     DirectionsLeg[] myLegs;
@@ -202,65 +205,70 @@ public class GPS extends AppCompatActivity implements
 
         // Récupération des points de départ et arrivée pour l'itinéraire.
         Intent myIntent = getIntent();
-        origin = myIntent.getStringExtra("Origine");
-        //originLoc = new LatLng(mCurrentLocation.getLatitude(),mCurrentLocation.getLongitude());
         destination = myIntent.getStringExtra("Destination");
+        originGiven = myIntent.getBooleanExtra("Origine donnée",true);
 
-        //Crée la requête d'itinéraire
-        GeoApiContext context = new GeoApiContext().setApiKey(getResources().getString(R.string.google_maps_directions));
-        DirectionsApiRequest request = DirectionsApi.newRequest(context).origin(origin).destination(destination);
-        // Envoie la requête de manière Asynchrone et stocke les résultats
-        Callback<DirectionsResult> callback = new Callback<DirectionsResult>() {
-                    @Override
-                    public void onResult(DirectionsResult result) {
-                        // Handle successful request.
-                        myRoutes = result.routes;
-                        if (myRoutes.length > 0) {
-                            for (int r = 0; r < myRoutes.length; r++) {
-                                System.out.println("route " + r + " : " + myRoutes[r].summary);
-                                DirectionsRoute dr = myRoutes[r];
-                                myLegs = dr.legs;
-                                for (int l = 0; l < myLegs.length; l++) {
-                                    System.out.println("\tleg " + l + " : " + myLegs[l].startAddress + " - " + myLegs[l].endAddress);
-                                    mySteps = myLegs[l].steps;
-                                    myPolylines = new EncodedPolyline[mySteps.length];
-                                    instructions = new String[mySteps.length];
-                                    for (int s = 0; s < mySteps.length; s++) {
-                                        System.out.println("\t\tstep " + s + " : " + mySteps[s].duration);
-                                        myPolylines[s] = mySteps[s].polyline;
-                                        System.out.println("\t\tpolylines "  + " : " + myPolylines[s]);
-                                        instructions[s] = mySteps[s].htmlInstructions;
-                                    }
+        if(originGiven){
+            origin = myIntent.getStringExtra("Origine");
+            //originLoc = new LatLng(mCurrentLocation.getLatitude(),mCurrentLocation.getLongitude());
+
+            //Crée la requête d'itinéraire
+            GeoApiContext context = new GeoApiContext().setApiKey(getResources().getString(R.string.google_maps_directions));
+            DirectionsApiRequest request = DirectionsApi.newRequest(context).origin(origin).destination(destination);
+            // Envoie la requête de manière Asynchrone et stocke les résultats
+            Callback<DirectionsResult> callback = new Callback<DirectionsResult>() {
+                @Override
+                public void onResult(DirectionsResult result) {
+                    // Handle successful request.
+                    myRoutes = result.routes;
+                    if (myRoutes.length > 0) {
+                        for (int r = 0; r < myRoutes.length; r++) {
+                            System.out.println("route " + r + " : " + myRoutes[r].summary);
+                            DirectionsRoute dr = myRoutes[r];
+                            myLegs = dr.legs;
+                            for (int l = 0; l < myLegs.length; l++) {
+                                System.out.println("\tleg " + l + " : " + myLegs[l].startAddress + " - " + myLegs[l].endAddress);
+                                mySteps = myLegs[l].steps;
+                                myPolylines = new EncodedPolyline[mySteps.length];
+                                instructions = new String[mySteps.length];
+                                for (int s = 0; s < mySteps.length; s++) {
+                                    System.out.println("\t\tstep " + s + " : " + mySteps[s].duration);
+                                    myPolylines[s] = mySteps[s].polyline;
+                                    System.out.println("\t\tpolylines "  + " : " + myPolylines[s]);
+                                    instructions[s] = mySteps[s].htmlInstructions;
                                 }
                             }
-                        } else {
-                            System.out.println("route vide");
                         }
-
+                    } else {
+                        System.out.println("route vide");
                     }
 
-                    @Override
-                    public void onFailure(Throwable e) {
-                        // Handle error.
-                        System.out.println("\t\tonFailure "+ e );
-                    }
-                };
-        request.setCallback(callback);
+                }
 
-        try {
-            Thread.sleep(2000);
-        } catch (Exception e) {
+                @Override
+                public void onFailure(Throwable e) {
+                    // Handle error.
+                    System.out.println("\t\tonFailure "+ e );
+                }
+            };
+            request.setCallback(callback);
+
+            try {
+                Thread.sleep(2000);
+            } catch (Exception e) {
+            }
+
+            //Création de la map
+            SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+            mapFragment.getMapAsync(this);
+
+            try {
+                Thread.sleep(10000);
+            } catch (Exception e) {
+            }
         }
 
-        //Création de la map
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-
-        try {
-            Thread.sleep(10000);
-        } catch (Exception e) {
-        }
-
+        else{}
     }
 
     /**
@@ -543,6 +551,66 @@ public class GPS extends AppCompatActivity implements
             mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
             mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
             updateLocationUI();
+
+            if (originGiven){}
+            else {
+                originLoc = new LatLng(mCurrentLocation.getLatitude(),mCurrentLocation.getLongitude());
+
+                //Crée la requête d'itinéraire
+                GeoApiContext context = new GeoApiContext().setApiKey(getResources().getString(R.string.google_maps_directions));
+                DirectionsApiRequest request = DirectionsApi.newRequest(context).origin(originLoc).destination(destination);
+                // Envoie la requête de manière Asynchrone et stocke les résultats
+                Callback<DirectionsResult> callback = new Callback<DirectionsResult>() {
+                    @Override
+                    public void onResult(DirectionsResult result) {
+                        // Handle successful request.
+                        myRoutes = result.routes;
+                        if (myRoutes.length > 0) {
+                            for (int r = 0; r < myRoutes.length; r++) {
+                                System.out.println("route " + r + " : " + myRoutes[r].summary);
+                                DirectionsRoute dr = myRoutes[r];
+                                myLegs = dr.legs;
+                                for (int l = 0; l < myLegs.length; l++) {
+                                    System.out.println("\tleg " + l + " : " + myLegs[l].startAddress + " - " + myLegs[l].endAddress);
+                                    mySteps = myLegs[l].steps;
+                                    myPolylines = new EncodedPolyline[mySteps.length];
+                                    instructions = new String[mySteps.length];
+                                    for (int s = 0; s < mySteps.length; s++) {
+                                        System.out.println("\t\tstep " + s + " : " + mySteps[s].duration);
+                                        myPolylines[s] = mySteps[s].polyline;
+                                        System.out.println("\t\tpolylines "  + " : " + myPolylines[s]);
+                                        instructions[s] = mySteps[s].htmlInstructions;
+                                    }
+                                }
+                            }
+                        } else {
+                            System.out.println("route vide");
+                        }
+
+                    }
+
+                    @Override
+                    public void onFailure(Throwable e) {
+                        // Handle error.
+                        System.out.println("\t\tonFailure "+ e );
+                    }
+                };
+                request.setCallback(callback);
+
+                try {
+                    Thread.sleep(2000);
+                } catch (Exception e) {
+                }
+
+                //Création de la map
+                SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+                mapFragment.getMapAsync(this);
+
+                try {
+                    Thread.sleep(10000);
+                } catch (Exception e) {
+                }
+            }
         }
         if (mRequestingLocationUpdates) {
             Log.i(TAG, "in onConnected(), starting location updates");
@@ -670,7 +738,7 @@ public class GPS extends AppCompatActivity implements
         double distanceEntreDeuxPointsConnus = 0;
         double distancePos = 0 ;
 
-        precision = mCurrentLocation.getAccuracy();
+        precision = 1;
 
         if (calculationByDistance(oldLocation.getLatitude(), oldLocation.getLongitude(), mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude()) > precision){
 
