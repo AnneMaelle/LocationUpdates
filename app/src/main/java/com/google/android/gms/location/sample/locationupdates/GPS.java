@@ -83,7 +83,7 @@ public class GPS extends AppCompatActivity implements
     /**
      * The desired interval for location updates. Inexact. Updates may be more or less frequent.
      */
-    public static final long UPDATE_INTERVAL_IN_MILLISECONDS = 5000;
+    public static final long UPDATE_INTERVAL_IN_MILLISECONDS = 30000;
 
     /**
      * The fastest rate for active location updates. Exact. Updates will never be more frequent
@@ -662,12 +662,21 @@ public class GPS extends AppCompatActivity implements
     }
 
     public void positionConducteur(){
+        System.out.println("\t\tpositionConducteur"  + " :jeSuisRentrée");
         int i = 0;
         double epsilon = (double) 3*10/36;
         int  conseil = 9;
+        double precision = 0;
+        double distanceEntreDeuxPointsConnus = 0;
+        double distancePos = 0 ;
 
+        precision = mCurrentLocation.getAccuracy();
 
+        if (calculationByDistance(oldLocation.getLatitude(), oldLocation.getLongitude(), mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude()) > precision){
+
+            distanceEntreDeuxPointsConnus = calculationByDistance(trajetPredit.get(indiceDernierePos).latitude, trajetPredit.get(indiceDernierePos).longitude,
                     trajetPredit.get(indiceDernierePos + 1).latitude,trajetPredit.get(indiceDernierePos + 1).longitude);
+            distancePos = calculationByDistance(trajetPredit.get(indiceDernierePos).latitude, trajetPredit.get(indiceDernierePos).longitude,
                     mCurrentLocation.getLatitude(),mCurrentLocation.getLongitude());
             System.out.println("\t\tdistancePos"  + " : " + distancePos);
 
@@ -676,7 +685,9 @@ public class GPS extends AppCompatActivity implements
                     indiceDernierePos ++;
                     distanceEntreDeuxPointsConnus += calculationByDistance(trajetPredit.get(indiceDernierePos).latitude, trajetPredit.get(indiceDernierePos).longitude,
                             trajetPredit.get(indiceDernierePos + 1).latitude,trajetPredit.get(indiceDernierePos + 1).longitude);
+                    System.out.println("\t\tdistanceEntreDeuxPointsConnus"  + " : " + distanceEntreDeuxPointsConnus);
                 }
+            }
 
             oldLocation = mCurrentLocation;
             oldSpeed = currentSpeed;
