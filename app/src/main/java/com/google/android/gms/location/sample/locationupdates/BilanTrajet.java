@@ -2,18 +2,18 @@ package com.google.android.gms.location.sample.locationupdates;
 
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.Path;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.TextView;
-import android.widget.Toolbar;
+import android.support.v7.widget.Toolbar;
 
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.maps.Polyline;
-import com.google.maps.model.LatLng;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.maps.model.LatLng;
 
 public class BilanTrajet extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -26,10 +26,9 @@ public class BilanTrajet extends AppCompatActivity implements OnMapReadyCallback
     protected int myTotalScore = 0;
     protected float[] myRoadLong;
     protected float[] myRoadLat;
-    protected Color myColor;
+    protected int myColor;
 
-    protected google.maps.Polyline myRoad ;
-
+    Polyline myRoad ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +49,12 @@ public class BilanTrajet extends AppCompatActivity implements OnMapReadyCallback
         myRoadLat = myIntent.getFloatArrayExtra("Latitudes");
         myRoadScores = myIntent.getIntArrayExtra("Scores");
 
+    }
+
+    public void onMapReady(GoogleMap map){
+
+        myMap = map;
+
         // Calcul du score et création du Path pour la Polyline
         myTotalScore += myRoadScores[0];
         for (int i = 1; i < myRoadScores.length; i++) {
@@ -60,13 +65,12 @@ public class BilanTrajet extends AppCompatActivity implements OnMapReadyCallback
             else if (myRoadScores[i] < 5){
                 myColor = Color.RED ; //Hexadecimal code : (0xffff0000)
             }
-            else if (5 <= myRoadScores[i] || myRoadScores <= 5){
+            else if (5 <= myRoadScores[i] || myRoadScores[i] <= 5){
                 myColor = Color.GRAY; //Hexadecimal code : (0xffcccccc)
             }
             myRoad = myMap.addPolyline(new PolylineOptions()
-                    .add(LatLng(myRoadLat[i-1],myRoadLong[i-1]),LatLng(myRoadLat[i],myRoadLong[i]))
+                    .add(new LatLng(myRoadLat[i-1],myRoadLong[i-1]),new LatLng(myRoadLat[i],myRoadLong[i]))
                     .color(myColor));
         }
-
     }
 }
