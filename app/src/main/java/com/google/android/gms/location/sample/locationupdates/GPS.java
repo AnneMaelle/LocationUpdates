@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.location.Location;
 import android.os.Bundle;
+import android.speech.tts.TextToSpeech;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -44,6 +45,7 @@ import com.google.maps.model.LatLng;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Vector;
 
 import static java.lang.Math.abs;
@@ -71,6 +73,7 @@ public class GPS extends AppCompatActivity implements
         ConnectionCallbacks,
         OnConnectionFailedListener,
         LocationListener,
+        TextToSpeech.OnInitListener,
         OnMapReadyCallback {
 
     protected static final String TAG = "GPS";
@@ -96,6 +99,7 @@ public class GPS extends AppCompatActivity implements
     protected final static String KEY_REQUESTING_LOCATION_UPDATES = "requesting-location-updates";
     protected final static String KEY_LOCATION = "location";
     protected final static String KEY_LAST_UPDATED_TIME_STRING = "last-updated-time-string";
+    protected String language = "fr";
 
     /**
      * Provides the entry point to Google Play services.
@@ -133,6 +137,7 @@ public class GPS extends AppCompatActivity implements
     protected TextView mLocationInadequateWarning;
     protected TextView mSpeedTextView;
     protected GoogleMap myMap;
+    private TextToSpeech tts;
 
     // Labels.
     protected String mLatitudeLabel;
@@ -155,17 +160,21 @@ public class GPS extends AppCompatActivity implements
     private String origin = "Metz";
     private String destination = "Paris";
 
+    //Vrai si l'origine est précisée par l'utilisateur, faux si il demande MaPosition
     boolean originGiven = true;
 
-    DirectionsResult myResult;
+    //Construction de l'itinéraire
     DirectionsRoute[] myRoutes;
     DirectionsLeg[] myLegs;
     DirectionsStep[] mySteps;
-    DirectionsStep currentStep;
+    Vector<com.google.android.gms.maps.model.LatLng> debutStep;
+    int indiceCurrentStep;
     EncodedPolyline[] myPolylines;
     String[] instructions;
     Vector<com.google.android.gms.maps.model.LatLng> trajetPredit = new Vector<>();
     Troncon t;
+
+    boolean consigne100 = true;
 
     int indiceDernierePos = 0;
 
@@ -175,6 +184,9 @@ public class GPS extends AppCompatActivity implements
         setContentView(R.layout.activity_gps);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        //Crée le TextToSpeech
+        tts = new TextToSpeech(this, this);
 
         // Locate the UI widgets.
         mStartUpdatesButton = (Button) findViewById(R.id.start_updates_button);
@@ -214,7 +226,8 @@ public class GPS extends AppCompatActivity implements
 
             //Crée la requête d'itinéraire
             GeoApiContext context = new GeoApiContext().setApiKey(getResources().getString(R.string.google_maps_directions));
-            DirectionsApiRequest request = DirectionsApi.newRequest(context).origin(origin).destination(destination);
+            DirectionsApiRequest request = DirectionsApi.newRequest(context).origin(origin).destination(destination).language(language
+            );
             // Envoie la requête de manière Asynchrone et stocke les résultats
             Callback<DirectionsResult> callback = new Callback<DirectionsResult>() {
                 @Override
@@ -234,7 +247,6 @@ public class GPS extends AppCompatActivity implements
                                 for (int s = 0; s < mySteps.length; s++) {
                                     System.out.println("\t\tstep " + s + " : " + mySteps[s].duration);
                                     myPolylines[s] = mySteps[s].polyline;
-                                    System.out.println("\t\tpolylines "  + " : " + myPolylines[s]);
                                     instructions[s] = mySteps[s].htmlInstructions;
                                 }
                             }
@@ -531,6 +543,15 @@ public class GPS extends AppCompatActivity implements
         super.onStop();
         mGoogleApiClient.disconnect();
     }
+    @Override
+    public void onDestroy() {
+        // Don't forget to shutdown tts!
+        if (tts != null) {
+            tts.stop();
+            tts.shutdown();
+        }
+        super.onDestroy();
+    }
 
     /**
      * Runs when a GoogleApiClient object successfully connects.
@@ -552,13 +573,12 @@ public class GPS extends AppCompatActivity implements
             mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
             updateLocationUI();
 
-            if (originGiven){}
-            else {
+            if (!originGiven){
                 originLoc = new LatLng(mCurrentLocation.getLatitude(),mCurrentLocation.getLongitude());
 
                 //Crée la requête d'itinéraire
                 GeoApiContext context = new GeoApiContext().setApiKey(getResources().getString(R.string.google_maps_directions));
-                DirectionsApiRequest request = DirectionsApi.newRequest(context).origin(originLoc).destination(destination);
+                DirectionsApiRequest request = DirectionsApi.newRequest(context).origin(originLoc).destination(destination).language(language);
                 // Envoie la requête de manière Asynchrone et stocke les résultats
                 Callback<DirectionsResult> callback = new Callback<DirectionsResult>() {
                     @Override
@@ -633,6 +653,8 @@ public class GPS extends AppCompatActivity implements
         myMap.moveCamera(CameraUpdateFactory.newLatLngZoom(loc, 17));
         positionConducteur();
         updateLocationUI();
+
+        procheConsigne();
     }
 
     @Override
@@ -720,6 +742,16 @@ public class GPS extends AppCompatActivity implements
                 polyOpt.add(myLatLng);
             }
         }
+
+        debutStep = new Vector<>();
+        for (int i=0; i<mySteps.length; i++){
+            com.google.android.gms.maps.model.LatLng myStart = new com.google.android.gms.maps.model.LatLng(mySteps[i].startLocation.lat,mySteps[i].startLocation.lng);
+            com.google.android.gms.maps.model.LatLng myEnd = new com.google.android.gms.maps.model.LatLng(mySteps[i].endLocation.lat,mySteps[i].endLocation.lng);
+            myMap.addMarker(new MarkerOptions().position(myStart));
+            myMap.addMarker(new MarkerOptions().position(myEnd));
+            debutStep.add(myStart);
+        }
+
         myMap.addPolyline(polyOpt);
         myMap.setMyLocationEnabled(true);
 
@@ -727,6 +759,28 @@ public class GPS extends AppCompatActivity implements
         System.out.println("\t\ttrajetPredit"  + " : " + trajetPredit.size());
         float d = (float) calculationByDistance(trajetPredit.get(trajetPredit.size()-1).latitude, trajetPredit.get(trajetPredit.size()-1).longitude, trajetPredit.get(0).latitude, trajetPredit.get(0).longitude);
         t = new Troncon(0, d, 90, 70, 110, trajetPredit);
+    }
+    @Override
+    public void onInit(int status) {
+
+        if (status == TextToSpeech.SUCCESS) {
+
+            int result = tts.setLanguage(Locale.FRANCE);
+
+            if (result == TextToSpeech.LANG_MISSING_DATA
+                    || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                Log.e("TTS", "This Language is not supported");
+            } else {
+                speakOut("");
+            }
+
+        } else {
+            Log.e("TTS", "Initilization Failed!");
+        }
+
+    }
+    private void speakOut(String txtText) {
+        tts.speak(txtText, TextToSpeech.QUEUE_FLUSH, null);
     }
 
     public void positionConducteur(){
@@ -770,6 +824,27 @@ public class GPS extends AppCompatActivity implements
         }
 
     }
+    public void procheConsigne(){
+
+        int indiceStep = indiceCurrentStep;
+        double distanceConsigneNext;
+        com.google.android.gms.maps.model.LatLng next= new com.google.android.gms.maps.model.LatLng(mySteps[indiceCurrentStep].endLocation.lat,mySteps[indiceCurrentStep].endLocation.lng);
+        distanceConsigneNext = calculationByDistance(mCurrentLocation.getLatitude(),mCurrentLocation.getLongitude(),mySteps[indiceCurrentStep].endLocation.lat,mySteps[indiceCurrentStep].endLocation.lng);
+        System.out.println("\t\tconsigne"  + " : " + distanceConsigneNext);
+        if (distanceConsigneNext<50){
+            donnerConsigne(next,50);
+            indiceCurrentStep++;
+            consigne100 = true;
+        }
+
+        System.out.println("\t\tconsigne"  + " 2e if: " + mySteps[indiceCurrentStep].distance.inMeters);
+        if(mySteps[indiceCurrentStep].distance.inMeters>150 & indiceStep==indiceCurrentStep){
+            if(distanceConsigneNext<100 & consigne100){
+                donnerConsigne(next,100);
+                consigne100 = false;
+            }
+        }
+    }
     public void donnerConseil(int conseil){
         Context context = getApplicationContext();
         // à compléter : conditions
@@ -799,4 +874,12 @@ public class GPS extends AppCompatActivity implements
         }
     }
 
+    public void donnerConsigne(com.google.android.gms.maps.model.LatLng position, int dist){
+        int index = debutStep.indexOf(position);
+        String consigne = instructions[index];
+        consigne = consigne.replaceAll("\\<.*?\\>", ""); //On enlève les tags HTML
+        consigne = "À "+dist+"mètres, "+ consigne;
+        System.out.println("\t\tconsigne"  + " : " + consigne);
+        speakOut(consigne);
+    }
 }

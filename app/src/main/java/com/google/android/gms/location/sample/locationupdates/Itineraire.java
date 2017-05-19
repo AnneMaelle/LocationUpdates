@@ -6,9 +6,10 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 
-public class Itineraire extends AppCompatActivity implements View.OnKeyListener{
+public class Itineraire extends AppCompatActivity implements View.OnKeyListener {
 
     private EditText fromPoint ;
     private EditText toPoint;
@@ -25,16 +26,26 @@ public class Itineraire extends AppCompatActivity implements View.OnKeyListener{
         setSupportActionBar(itineraryToolbar);
 
         originGiven = true;
-        fromPoint = (EditText) findViewById(R.id.from) ;
-        fromPoint.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int Enter, KeyEvent event) {
-                
-                return false;
-            }
-        });
         toPoint = (EditText) findViewById(R.id.to) ;
-        fromPoint.setText("");
+        toPoint.setOnKeyListener(this);
+
+        fromPoint = (EditText) findViewById(R.id.from) ;
+        fromPoint.setOnKeyListener(this);
+    }
+
+    public boolean onKey(View myView, int keyCode, KeyEvent event){
+        if(keyCode==EditorInfo.IME_ACTION_SEARCH || keyCode==EditorInfo.IME_ACTION_DONE || event.getAction()==KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_ENTER){
+            if(!event.isShiftPressed()){
+                switch(myView.getId()){
+                    case R.id.from:
+                        break;
+                    case R.id.to:
+                        break;
+                }
+                return true;
+            }
+        }
+        return false;
     }
 
     public void goNoItineraryGPS(View myView){
@@ -50,7 +61,6 @@ public class Itineraire extends AppCompatActivity implements View.OnKeyListener{
     public void goGPS(View myView){
         origin = fromPoint.getText().toString();
         destination = toPoint.getText().toString();
-
         Intent gpsIntent = new Intent(this, GPS.class);
         gpsIntent.putExtra("Origine",origin);
         gpsIntent.putExtra("Destination",destination);
