@@ -77,54 +77,41 @@ public class GPS extends AppCompatActivity implements
         OnMapReadyCallback {
 
     protected static final String TAG = "GPS";
-
-    /**
-     * Constant used in the location settings dialog.
-     */
+                
+    //Constante utilisée dans les paramètres de dialogue
     protected static final int REQUEST_CHECK_SETTINGS = 0x1;
-
-    /**
-     * The desired interval for location updates. Inexact. Updates may be more or less frequent.
-     */
+                
+    //Intervalle entre chaque mise à jour de Location, il ne faut pas que la valeur soit trop basse   
     public static final long UPDATE_INTERVAL_IN_MILLISECONDS = 30000;
-
-    /**
-     * The fastest rate for active location updates. Exact. Updates will never be more frequent
-     * than this value.
-     */
+                
+    //Taux de mise à jour de position le plus rapide. Les mises à jour ne seront jamais plus fréquentes
     public static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS =
             UPDATE_INTERVAL_IN_MILLISECONDS / 2;
 
-    // Keys for storing activity state in the Bundle.
+    // Clés pour stocker des activités dans le bundle
     protected final static String KEY_REQUESTING_LOCATION_UPDATES = "requesting-location-updates";
     protected final static String KEY_LOCATION = "location";
     protected final static String KEY_LAST_UPDATED_TIME_STRING = "last-updated-time-string";
     protected String language = "fr";
 
-    /**
-     * Provides the entry point to Google Play services.
-     */
+    //Point d'entrée pour les services Google Play
     protected GoogleApiClient mGoogleApiClient;
 
-    /**
-     * Stores parameters for requests to the FusedLocationProviderApi.
-     */
+    //Stocke les paramètres pour les requêtes à l'API FusedLocationProviderApi.
     protected LocationRequest mLocationRequest;
-
-    /**
-     * Stores the types of location services the client is interested in using. Used for checking
-     * settings to determine if the device has optimal location settings.
-     */
+    
+    //Stocke  les types des services de postition par lesquelles le client est intéressé. Est utilisé pour vérifier si l'appareil a les paramètres optimaux.
     protected LocationSettingsRequest mLocationSettingsRequest;
 
-    /**
-     * Represents a geographical location.
-     */
+    //Représente une position géographique
     protected Location mCurrentLocation;
-    protected LatLng originLoc;
     protected Location oldLocation = new Location("me");
+    protected LatLng originLoc;
+                
+    //Vitesse
     protected double currentSpeed = 0.0;
     protected double oldSpeed = 0.0;
+                
     protected double currentTime = 0.0;
     double EARTH_RADIUS = 6367.45;
 
@@ -145,15 +132,13 @@ public class GPS extends AppCompatActivity implements
     protected String mLastUpdateTimeLabel;
     protected String mSpeedLabel;
 
+    //            
     /**
      * Tracks the status of the location updates request. Value changes when the user presses the
      * Start Updates and Stop Updates buttons.
      */
     protected Boolean mRequestingLocationUpdates;
-
-    /**
-     * Time when the location was updated represented as a String.
-     */
+                
     protected String mLastUpdateTime;
 
     // Itinéraire
@@ -873,7 +858,8 @@ public class GPS extends AppCompatActivity implements
             toast.show();
         }
     }
-
+    
+    //Permet de lire en audio les instructions            
     public void donnerConsigne(com.google.android.gms.maps.model.LatLng position, int dist){
         int index = debutStep.indexOf(position);
         String consigne = instructions[index];
