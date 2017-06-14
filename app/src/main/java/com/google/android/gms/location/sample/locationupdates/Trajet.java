@@ -1,9 +1,13 @@
-package Optimisation;
+package com.google.android.gms.location.sample.locationupdates;
+
+import android.os.Parcelable;
 
 import java.util.Vector;
+
+import com.google.android.gms.location.sample.locationupdates.Troncon;
 import com.google.android.gms.maps.model.LatLng;
 
-public class Trajet {
+public class Trajet /*implements Parcelable*/{
 	private Vector<Troncon> troncons;
 	int nombreTroncon;
 	float EIdeal, EReel;
@@ -28,14 +32,14 @@ public class Trajet {
 	
 	public void finDeTrajet(){
 		Troncon t;
-		double distanceTotale;
+		double distanceTotale=0;
 		for (int i=0; i<nombreTroncon; i++){
 			t=troncons.elementAt(i);
 			EIdeal += t.EIdeal;
 			EReel += t.EReel;
-			noteCO2 += t.dTroncon*t.noteCO2;
-			noteVar += t.dTroncon*t.noteVar;
-			distanceTotale += t.dTroncon;
+			noteCO2 += t.getdTroncon()*t.noteCO2;
+			noteVar += t.getdTroncon()*t.noteVar;
+			distanceTotale += t.getdTroncon();
 			if (noteCO2 <= 1){
 				noteCO2 = 100;
 			}else if (noteCO2 >= 2){
