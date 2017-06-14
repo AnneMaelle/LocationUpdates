@@ -132,9 +132,8 @@ public class GPS extends AppCompatActivity implements
     protected String mSpeedLabel;
 
     //            
-    /**
-     * Tracks the status of the location updates request. Value changes when the user presses the
-     * Start Updates and Stop Updates buttons.
+    /** Signale le besoin ou non de mettre à jour nos positions.
+     * La valeur change lorsque l'utilisateur appuie sur le bouton Start Updates ou Stop Updates.
      */
     protected Boolean mRequestingLocationUpdates;
                 
@@ -183,7 +182,7 @@ public class GPS extends AppCompatActivity implements
         mLocationInadequateWarning = (TextView) findViewById(R.id.location_inadequate_warning);
         mSpeedTextView = (TextView) findViewById(R.id.speed_text);
 
-        // Set labels.
+        // Définition des labels.
         mLatitudeLabel = getResources().getString(R.string.latitude_label);
         mLongitudeLabel = getResources().getString(R.string.longitude_label);
         mLastUpdateTimeLabel = getResources().getString(R.string.last_update_time_label);
@@ -192,11 +191,10 @@ public class GPS extends AppCompatActivity implements
         mRequestingLocationUpdates = false;
         mLastUpdateTime = "";
 
-        // Update values using data stored in the Bundle.
+        // Mise à jour des valeurs sauvegardées dans le Bundle.
         updateValuesFromBundle(savedInstanceState);
 
-        // Kick off the process of building the GoogleApiClient, LocationRequest, and
-        // LocationSettingsRequest objects.
+        // Création du client pour l'API Maps Direction
         buildGoogleApiClient();
         createLocationRequest();
         buildLocationSettingsRequest();
@@ -270,9 +268,7 @@ public class GPS extends AppCompatActivity implements
     }
 
     /**
-     * Updates fields based on data stored in the bundle.
-     *
-     * @param savedInstanceState The activity state saved in the Bundle.
+     * Mise à jour de différentes valeurs utiles pour la position
      */
     private void updateValuesFromBundle(Bundle savedInstanceState) {
         if (savedInstanceState != null) {
@@ -300,8 +296,7 @@ public class GPS extends AppCompatActivity implements
     }
 
     /**
-     * Builds a GoogleApiClient. Uses the {@code #addApi} method to request the
-     * LocationServices API.
+     * Construction du client pour l'API
      */
     protected synchronized void buildGoogleApiClient() {
         Log.i(TAG, "Building GoogleApiClient");
@@ -713,6 +708,7 @@ public class GPS extends AppCompatActivity implements
         double diffLong = abs(newLon-oldLon);
         System.out.println("\t\tspeed " + currentSpeed);
     }
+                
     public double calculationByDistance(double lat1, double long1, double lat2, double long2){
 
         float[] res = new float[1];
@@ -753,6 +749,7 @@ public class GPS extends AppCompatActivity implements
         float d = (float) calculationByDistance(trajetPredit.get(trajetPredit.size()-1).latitude, trajetPredit.get(trajetPredit.size()-1).longitude, trajetPredit.get(0).latitude, trajetPredit.get(0).longitude);
         t = new Troncon(0, d, 90, 70, 110, trajetPredit);
     }
+                
     @Override
     public void onInit(int status) {
 
@@ -776,6 +773,7 @@ public class GPS extends AppCompatActivity implements
         tts.speak(txtText, TextToSpeech.QUEUE_FLUSH, null);
     }
 
+    // Définit la position du conducteur pour pouvoir exécuter la lecture de la consigne d'itinéraire ou non.
     public void positionConducteur(){
         int i = 0;
         double epsilon = (double) 3*10/36;
@@ -813,6 +811,8 @@ public class GPS extends AppCompatActivity implements
         }
     }
 
+    // Détermine si on est proches ou pas d'une consigne d'itinéraire.
+    // Permet de lancer donneConsigne 50m avant l'exécution de l'instruction par le conducteur.
     public void procheConsigne(){
 
         int indiceStep = indiceCurrentStep;
@@ -834,6 +834,11 @@ public class GPS extends AppCompatActivity implements
             }
         }
     }
+                
+    // Création des conseils d'éco-conduite.
+    // Affichage des conseils sous forme de Toast ici,
+    // dans un développement futur, il faudrait les faire lire par TextToSpeech.
+                
     public void donnerConseil(int conseil){
         Context context = getApplicationContext();
         String txt = "";
