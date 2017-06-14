@@ -1,5 +1,6 @@
 package com.google.android.gms.location.sample.locationupdates;
 
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -163,6 +164,7 @@ public class GPS extends AppCompatActivity implements
     boolean consigne50 = false;
 
     int indiceDernierePos = 0;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -639,6 +641,7 @@ public class GPS extends AppCompatActivity implements
         // Contrôle la mise à jour de données de position
         mCurrentLocation = location;
         mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
+
         positionConducteur();
 
         com.google.android.gms.maps.model.LatLng loc = new com.google.android.gms.maps.model.LatLng(mCurrentLocation.getLatitude(),mCurrentLocation.getLongitude());
@@ -701,6 +704,7 @@ public class GPS extends AppCompatActivity implements
 
         double distance = calculationByDistance(newLat,newLon,oldLat,oldLon);
         double timeDifferent = newTime - currentTime;
+        t.setPas((float) timeDifferent);
         currentSpeed = distance*3.6/timeDifferent;
         currentTime = newTime;
         double diffLat = abs(newLat-oldLat);

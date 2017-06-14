@@ -244,5 +244,9 @@ public class Troncon {
         return dTroncon;
     }
 
+    public void setPas(float timeDifference){
+        pas = timeDifference;
+    }
+
 }
 
