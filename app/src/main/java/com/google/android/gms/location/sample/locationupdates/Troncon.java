@@ -239,5 +239,10 @@ public class Troncon {
         }
     }
 
+
+    public float getdTroncon(){
+        return dTroncon;
+    }
+
 }
 

@@ -82,7 +82,7 @@ public class GPS extends AppCompatActivity implements
     protected static final int REQUEST_CHECK_SETTINGS = 0x1;
                 
     //Intervalle entre chaque mise à jour de Location, il ne faut pas que la valeur soit trop basse   
-    public static final long UPDATE_INTERVAL_IN_MILLISECONDS = 30000;
+    public static final long UPDATE_INTERVAL_IN_MILLISECONDS = 5000;
                 
     //Taux de mise à jour de position le plus rapide. Les mises à jour ne seront jamais plus fréquentes
     public static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = UPDATE_INTERVAL_IN_MILLISECONDS / 2;
@@ -154,12 +154,13 @@ public class GPS extends AppCompatActivity implements
     int indiceCurrentStep;
     EncodedPolyline[] myPolylines;
     String[] instructions;
+    int[] indexInstructions;
     Vector<com.google.android.gms.maps.model.LatLng> trajetPredit = new Vector<>();
-    Vector<Float> notes = new Vector<>();
     Float[] notes2;
     Troncon t;
 
-    boolean consigne100 = true;
+    boolean consigne100 = false;
+    boolean consigne50 = false;
 
     int indiceDernierePos = 0;
 
@@ -494,15 +495,15 @@ public class GPS extends AppCompatActivity implements
             }
         });
 
-        for (int i=0;i<notes.size();i++){
+        /*for (int i=0;i<notes.size();i++){
             notes2[i]=notes.get(i);
         }
 
-        //Intent myIntent = new Intent(this,BilanTrajet.class);
-        //myIntent.putExtra("Longitudes",);
-        //myIntent.putExtra("Latitudes",);
-        //myIntent.putExtra("Scores",notes2);
-        //startActivity(myIntent);
+        Intent myIntent = new Intent(this,BilanTrajet.class);
+        myIntent.putExtra("Longitudes",);
+        myIntent.putExtra("Latitudes",);
+        myIntent.putExtra("Scores",notes2);
+        startActivity(myIntent);*/
     }
 
     @Override
@@ -644,8 +645,6 @@ public class GPS extends AppCompatActivity implements
         myMap.addMarker(new MarkerOptions().position(loc).title("A"));
         myMap.moveCamera(CameraUpdateFactory.newLatLngZoom(loc, 17));
         updateLocationUI();
-
-        procheConsigne();
     }
 
     @Override
@@ -725,6 +724,8 @@ public class GPS extends AppCompatActivity implements
         PolylineOptions polyOpt = new PolylineOptions();
 
         // Trace notre itinéraire
+        indexInstructions = new int[myPolylines.length];
+
         for (int s=0; s<myPolylines.length;s++) {
 
             List<LatLng> poly = myPolylines[s].decodePath();
@@ -733,6 +734,9 @@ public class GPS extends AppCompatActivity implements
                 trajetPredit.add(myLatLng);
                 polyOpt.add(myLatLng);
             }
+            com.google.android.gms.maps.model.LatLng myEnd = new com.google.android.gms.maps.model.LatLng(mySteps[s].endLocation.lat,mySteps[s].endLocation.lng);
+            trajetPredit.add(myEnd);
+            polyOpt.add(myEnd);
         }
             
         // Place notre point de départ et notre point d'arrivée sur la carte
@@ -743,13 +747,16 @@ public class GPS extends AppCompatActivity implements
             myMap.addMarker(new MarkerOptions().position(myStart));
             myMap.addMarker(new MarkerOptions().position(myEnd));
             debutStep.add(myStart);
+
+            System.out.println("\t\tRemplissage indexInstructions : " + myEnd);
+            indexInstructions[i]=trajetPredit.indexOf(myEnd);
         }
 
         myMap.addPolyline(polyOpt);
         myMap.setMyLocationEnabled(true);
 
         //Création du troncon
-        System.out.println("\t\ttrajetPredit"  + " : " + trajetPredit.size());
+        System.out.println("\t\ttrajetPredit"  + " : " + trajetPredit);
         float d = (float) calculationByDistance(trajetPredit.get(trajetPredit.size()-1).latitude, trajetPredit.get(trajetPredit.size()-1).longitude, trajetPredit.get(0).latitude, trajetPredit.get(0).longitude);
         t = new Troncon(0, d, 90, 70, 110, trajetPredit);
     }
@@ -775,6 +782,7 @@ public class GPS extends AppCompatActivity implements
     }
                 
     private void speakOut(String txtText) {
+        while(tts.isSpeaking()){}
         // Lit les conseils/consignes
         tts.speak(txtText, TextToSpeech.QUEUE_FLUSH, null);
     }
@@ -789,6 +797,12 @@ public class GPS extends AppCompatActivity implements
         double oldD =0;
         double newD = 0;
         double precision = Math.min(mCurrentLocation.getAccuracy(),oldLocation.getAccuracy());
+        int indexConsigne=0;
+        int indiceStep=0;
+
+        double distanceConsigneNext = 0;
+
+        //Distance parcourue entre deux positions
         double distance = calculationByDistance(oldLocation.getLatitude(), oldLocation.getLongitude(), mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
 
         System.out.println("\t\tposition lat"  + " : " + mCurrentLocation.getLatitude() + ", position long : "  + mCurrentLocation.getLongitude());
@@ -796,8 +810,8 @@ public class GPS extends AppCompatActivity implements
         System.out.println("\t\tdistance1"  + " : " + distance);
 
         System.out.println("\t\tPrecision : " + precision);
-        if (distance > precision){
 
+        if (distance > precision){
             System.out.println("\t\tboucle if");
 
             while (dTot < distance && oldD > newD){
@@ -807,17 +821,30 @@ public class GPS extends AppCompatActivity implements
                         mCurrentLocation.getLatitude(),mCurrentLocation.getLongitude());
                 dTot+= newD;
             };
+
             double dGauche = 0;
             if (indiceDernierePos > 0) {
                 dGauche = Math.abs(calculationByDistance(trajetPredit.get(indiceDernierePos).latitude, trajetPredit.get(indiceDernierePos).longitude,
                         trajetPredit.get(indiceDernierePos - 1).latitude, trajetPredit.get(indiceDernierePos - 1).longitude) - newD);
             }
+
             double dDroite = Math.abs(calculationByDistance(trajetPredit.get(indiceDernierePos).latitude, trajetPredit.get(indiceDernierePos).longitude,
                     trajetPredit.get(indiceDernierePos + 1).latitude,trajetPredit.get(indiceDernierePos + 1).longitude) - newD);
+
             if (dGauche < dDroite && indiceDernierePos > 0) {
                 indiceDernierePos -= 1;
-
             }
+
+            for (int k=0;true;k++){
+                System.out.println("\t\tconsigneIndexInstructions : " + indexConsigne +", indicePos = "+indiceDernierePos);
+                indexConsigne = indexInstructions[k];
+                indiceStep = k;
+                if (indexConsigne>indiceDernierePos){
+                    break;
+                }
+            }
+
+            procheConsigne(indiceStep);
 
             getSpeed(mCurrentLocation, oldLocation);
             conseil = t.conseil(currentSpeed, oldSpeed, indiceDernierePos, epsilon);
@@ -825,31 +852,31 @@ public class GPS extends AppCompatActivity implements
             oldLocation = mCurrentLocation;
         }
     }
-
     
-    public void procheConsigne(){
+    public void procheConsigne(int indiceStep){
         // Détermine si on est proches ou pas d'une consigne d'itinéraire.
         // Permet de lancer donneConsigne 50m avant l'exécution de l'instruction par le conducteur.
-        int indiceStep = indiceCurrentStep;
+
         double distanceConsigneNext;
+
         com.google.android.gms.maps.model.LatLng next= new com.google.android.gms.maps.model.LatLng(
-                mySteps[indiceCurrentStep].endLocation.lat,mySteps[indiceCurrentStep].endLocation.lng);
+                mySteps[indiceStep].endLocation.lat,mySteps[indiceStep].endLocation.lng);
 
         distanceConsigneNext = calculationByDistance(mCurrentLocation.getLatitude(),mCurrentLocation.getLongitude(),
-                mySteps[indiceCurrentStep].endLocation.lat,mySteps[indiceCurrentStep].endLocation.lng);
+                mySteps[indiceStep].endLocation.lat,mySteps[indiceStep].endLocation.lng);
 
         System.out.println("\t\tconsigne"  + " : " + distanceConsigneNext);
-        if (distanceConsigneNext<50){
+        if (distanceConsigneNext<300 & !consigne50){
             donnerConsigne(next,50);
             indiceCurrentStep++;
-            consigne100 = true;
+            consigne50 = true;
         }
 
-        System.out.println("\t\tconsigne"  + " 2e if: " + mySteps[indiceCurrentStep].distance.inMeters);
-        if(mySteps[indiceCurrentStep].distance.inMeters>150 & indiceStep==indiceCurrentStep){
-            if(distanceConsigneNext<100 & consigne100){
+        System.out.println("\t\tconsigne"  + " 2e if: " + mySteps[indiceStep].distance.inMeters);
+        if(mySteps[indiceStep].distance.inMeters>150 ){
+            if(distanceConsigneNext<100 & !consigne100){
                 donnerConsigne(next,100);
-                consigne100 = false;
+                consigne100 = true;
             }
         }
     }
@@ -902,8 +929,9 @@ public class GPS extends AppCompatActivity implements
         int index = debutStep.indexOf(position);
         String consigne = instructions[index];
         consigne = consigne.replaceAll("\\<.*?\\>", ""); //On enlève les tags HTML
-        consigne = "À "+dist+"mètres, "+ consigne;
+        consigne = "À "+dist+" mètres, "+ consigne;
         System.out.println("\t\tconsigne"  + " : " + consigne);
         speakOut(consigne);
+
     }
 }
