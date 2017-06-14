@@ -117,6 +117,8 @@ public class Troncon {
         // -3 si l'accélération n'est pas assez élevée
         // 3 si l'accélération est trop élevée.
 
+        //met à jour la note
+
         double sigma = 0;
 
         //calcul du taux de CO2 rejeté
@@ -193,7 +195,7 @@ public class Troncon {
                         }
                     } else { //décéleration
                         double dec = (vitesseActuelle - vitessePrecedente)/pas;
-                        if (dec > a2 + epsilon){ // !!!!Attention au signe, à revoir
+                        if (dec > a2 + epsilon){ //decélération
                             return (2);
                         } else if ( dec < a2 - epsilon){
                             return(-2);
