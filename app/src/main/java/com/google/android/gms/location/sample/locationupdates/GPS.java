@@ -80,26 +80,12 @@ public class GPS extends AppCompatActivity implements
                 
     //Constante utilisée dans les paramètres de dialogue
     protected static final int REQUEST_CHECK_SETTINGS = 0x1;
-<<<<<<< Updated upstream
                 
     //Intervalle entre chaque mise à jour de Location, il ne faut pas que la valeur soit trop basse   
     public static final long UPDATE_INTERVAL_IN_MILLISECONDS = 30000;
                 
     //Taux de mise à jour de position le plus rapide. Les mises à jour ne seront jamais plus fréquentes
-=======
-
-    /**
-     * The desired interval for location updates. Inexact. Updates may be more or less frequent.
-     */
-    public static final long UPDATE_INTERVAL_IN_MILLISECONDS = 5000;
-
-    /**
-     * The fastest rate for active location updates. Exact. Updates will never be more frequent
-     * than this value.
-     */
->>>>>>> Stashed changes
-    public static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS =
-            UPDATE_INTERVAL_IN_MILLISECONDS / 2;
+    public static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = UPDATE_INTERVAL_IN_MILLISECONDS / 2;
 
     // Clés pour stocker des activités dans le bundle
     protected final static String KEY_REQUESTING_LOCATION_UPDATES = "requesting-location-updates";
@@ -845,29 +831,40 @@ public class GPS extends AppCompatActivity implements
     }
     public void donnerConseil(int conseil){
         Context context = getApplicationContext();
+        String txt = "";
         // à compléter : conditions
         if (conseil == -3 | conseil == -2){
-            Toast toast = Toast.makeText(context, "Levez le pied", Toast.LENGTH_LONG);
+            txt = "Levez le pied";
+            Toast toast = Toast.makeText(context, txt , Toast.LENGTH_LONG);
+            speakOut(txt);
             toast.show();
         }
 
         if (conseil == -1){
-            Toast toast = Toast.makeText(context, "Accélerez", Toast.LENGTH_LONG);
+            txt = "Accélerez";
+            Toast toast = Toast.makeText(context, txt, Toast.LENGTH_LONG);
+            speakOut(txt);
             toast.show();
         }
 
         if (conseil == 1){
-            Toast toast = Toast.makeText(context, "Ralentissez", Toast.LENGTH_LONG);
+            txt = "Ralentissez";
+            Toast toast = Toast.makeText(context, txt, Toast.LENGTH_LONG);
+            speakOut(txt);
             toast.show();
         }
 
         if (conseil == 2 | conseil == 3){
-            Toast toast = Toast.makeText(context, "Appuyez sur l'accélérateur", Toast.LENGTH_LONG);
+            txt = "Appuyez sur l'accélérateur";
+            Toast toast = Toast.makeText(context, txt, Toast.LENGTH_LONG);
+            speakOut(txt);
             toast.show();
         }
 
         if (conseil == 0){
-            Toast toast = Toast.makeText(context, "C'est parfait", Toast.LENGTH_LONG);
+            txt = "C'est parfait";
+            Toast toast = Toast.makeText(context, txt, Toast.LENGTH_LONG);
+            speakOut(txt);
             toast.show();
         }
     }
