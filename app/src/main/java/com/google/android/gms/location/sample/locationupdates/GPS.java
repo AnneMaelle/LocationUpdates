@@ -1,5 +1,6 @@
 package com.google.android.gms.location.sample.locationupdates;
 
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -163,6 +164,7 @@ public class GPS extends AppCompatActivity implements
     boolean consigne100 = false;
 
     int indiceDernierePos = 0;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -639,6 +641,7 @@ public class GPS extends AppCompatActivity implements
         // Contrôle la mise à jour de données de position
         mCurrentLocation = location;
         mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
+
         positionConducteur();
 
         com.google.android.gms.maps.model.LatLng loc = new com.google.android.gms.maps.model.LatLng(mCurrentLocation.getLatitude(),mCurrentLocation.getLongitude());
@@ -701,6 +704,7 @@ public class GPS extends AppCompatActivity implements
 
         double distance = calculationByDistance(newLat,newLon,oldLat,oldLon);
         double timeDifferent = newTime - currentTime;
+        t.setPas((float) timeDifferent);
         currentSpeed = distance*3.6/timeDifferent;
         currentTime = newTime;
         double diffLat = abs(newLat-oldLat);
@@ -802,19 +806,21 @@ public class GPS extends AppCompatActivity implements
 
         double distanceConsigneNext = 0;
 
-        //Distance parcourue entre deux positions
+        //Distance parcourue entre deux positions prélevées
         double distance = calculationByDistance(oldLocation.getLatitude(), oldLocation.getLongitude(), mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
 
         System.out.println("\t\tposition lat"  + " : " + mCurrentLocation.getLatitude() + ", position long : "  + mCurrentLocation.getLongitude());
         System.out.println("\t\tancienne position lat"  + " : " + oldLocation.getLatitude() + ", position long : "  + oldLocation.getLongitude());
         System.out.println("\t\tdistance1"  + " : " + distance);
-
         System.out.println("\t\tPrecision : " + precision);
 
         if (distance > precision){
-            System.out.println("\t\tboucle if");
+            //si on détecte un mouvemment
 
             while (dTot < distance && oldD > newD){
+                //tant qu'on ne dépasse la distance entre les deux dernières mesure dans la liste de position
+                //et qu'on se rapproche du point dans la liste le plus proche de la mesure
+
                 indiceDernierePos++;
                 oldD = newD;
                 newD = calculationByDistance(trajetPredit.get(indiceDernierePos).latitude, trajetPredit.get(indiceDernierePos).longitude,
@@ -822,19 +828,27 @@ public class GPS extends AppCompatActivity implements
                 dTot+= newD;
             };
 
+            //après avoir trouvé le point le plus proche dans la liste, on veut savoir si la mesure est
+            // à "gauche" ou à "droite dans la liste (c'est à dire quel est le deuxième point le plus proche)
             double dGauche = 0;
+            double dDroite = 0;
             if (indiceDernierePos > 0) {
                 dGauche = Math.abs(calculationByDistance(trajetPredit.get(indiceDernierePos).latitude, trajetPredit.get(indiceDernierePos).longitude,
                         trajetPredit.get(indiceDernierePos - 1).latitude, trajetPredit.get(indiceDernierePos - 1).longitude) - newD);
             }
 
-            double dDroite = Math.abs(calculationByDistance(trajetPredit.get(indiceDernierePos).latitude, trajetPredit.get(indiceDernierePos).longitude,
-                    trajetPredit.get(indiceDernierePos + 1).latitude,trajetPredit.get(indiceDernierePos + 1).longitude) - newD);
+            if (indiceDernierePos < trajetPredit.size()){
+                dDroite = Math.abs(calculationByDistance(trajetPredit.get(indiceDernierePos).latitude, trajetPredit.get(indiceDernierePos).longitude,
+                        trajetPredit.get(indiceDernierePos + 1).latitude,trajetPredit.get(indiceDernierePos + 1).longitude) - newD);
+
+            }
 
             if (dGauche < dDroite && indiceDernierePos > 0) {
                 indiceDernierePos -= 1;
             }
 
+            //trouver la consigne correspondante à la position
+            //si nécessaire
             for (int k=0;true;k++){
                 System.out.println("\t\tconsigneIndexInstructions : " + indexConsigne +", indicePos = "+indiceDernierePos);
                 indexConsigne = indexInstructions[k];
