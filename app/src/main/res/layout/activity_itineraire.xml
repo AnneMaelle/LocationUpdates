@@ -26,17 +26,18 @@
     <ImageView
         android:id="@+id/backgroundDeco"
         android:layout_width="match_parent"
-        android:layout_height="100dp"
+        android:layout_height="130dp"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true" />
+        android:layout_alignParentLeft="true"
+        android:background="@drawable/background"/>
 
     <ImageView
         android:id="@+id/favoritesButton"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:layout_marginLeft="70dp"
+        android:layout_marginLeft="50dp"
         android:layout_marginTop="60dp"
-        android:clickable="true" />
+        android:background="@drawable/favorites" />
 
     <TextView
         android:id="@+id/favoritesText"
@@ -51,12 +52,12 @@
 
     <ImageView
         android:id="@+id/historyButton"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
         android:layout_alignTop="@+id/favoritesButton"
-        android:clickable="true"
         android:layout_alignParentRight="true"
-        android:layout_marginRight="70dp" />
+        android:layout_marginRight="60dp"
+        android:background="@drawable/history"/>
 
     <TextView
         android:id="@+id/historyText"
@@ -129,13 +130,24 @@
 
     <Button
         android:id="@+id/letsGoButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="50dp"
+        android:layout_height="30dp"
         android:layout_above="@+id/backgroundDeco"
-        android:text="Go"
         android:onClick="goGPS"
+        android:background="@drawable/hat"
         android:layout_alignRight="@+id/to"
         android:layout_marginBottom="10dp" />
+    
+    <TextView
+        android:id="@+id/goText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="GO"
+        android:textColor="#000000"
+        android:layout_below="@+id/letsGoButton"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="70dp"
+        android:textSize="10dp" />
 
     <ImageButton
         android:id="@+id/originGivenButton"
