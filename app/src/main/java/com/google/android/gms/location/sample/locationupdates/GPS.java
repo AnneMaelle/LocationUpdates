@@ -780,22 +780,26 @@ public class GPS extends AppCompatActivity implements
     }
 
     public void positionConducteur(){
-        // Définit la position du conducteur pour pouvoir exécuter la lecture de la consigne d'itinéraire ou non.
+        // Définit la position du conducteur pour pouvoir exécuter la lecture de la consigne d'itinéraire et des conseils.
         int i = 0;
         double epsilon = (double) 3*10/36;
         int  conseil = 9;
+
         double dTot =0;
         double oldD =0;
         double newD = 0;
         double precision = Math.min(mCurrentLocation.getAccuracy(),oldLocation.getAccuracy());
         double distance = calculationByDistance(oldLocation.getLatitude(), oldLocation.getLongitude(), mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
+
         System.out.println("\t\tposition lat"  + " : " + mCurrentLocation.getLatitude() + ", position long : "  + mCurrentLocation.getLongitude());
         System.out.println("\t\tancienne position lat"  + " : " + oldLocation.getLatitude() + ", position long : "  + oldLocation.getLongitude());
         System.out.println("\t\tdistance1"  + " : " + distance);
 
         System.out.println("\t\tPrecision : " + precision);
         if (distance > precision){
+
             System.out.println("\t\tboucle if");
+
             while (dTot < distance && oldD > newD){
                 indiceDernierePos++;
                 oldD = newD;
@@ -812,6 +816,7 @@ public class GPS extends AppCompatActivity implements
                     trajetPredit.get(indiceDernierePos + 1).latitude,trajetPredit.get(indiceDernierePos + 1).longitude) - newD);
             if (dGauche < dDroite && indiceDernierePos > 0) {
                 indiceDernierePos -= 1;
+
             }
 
             getSpeed(mCurrentLocation, oldLocation);
@@ -827,8 +832,12 @@ public class GPS extends AppCompatActivity implements
         // Permet de lancer donneConsigne 50m avant l'exécution de l'instruction par le conducteur.
         int indiceStep = indiceCurrentStep;
         double distanceConsigneNext;
-        com.google.android.gms.maps.model.LatLng next= new com.google.android.gms.maps.model.LatLng(mySteps[indiceCurrentStep].endLocation.lat,mySteps[indiceCurrentStep].endLocation.lng);
-        distanceConsigneNext = calculationByDistance(mCurrentLocation.getLatitude(),mCurrentLocation.getLongitude(),mySteps[indiceCurrentStep].endLocation.lat,mySteps[indiceCurrentStep].endLocation.lng);
+        com.google.android.gms.maps.model.LatLng next= new com.google.android.gms.maps.model.LatLng(
+                mySteps[indiceCurrentStep].endLocation.lat,mySteps[indiceCurrentStep].endLocation.lng);
+
+        distanceConsigneNext = calculationByDistance(mCurrentLocation.getLatitude(),mCurrentLocation.getLongitude(),
+                mySteps[indiceCurrentStep].endLocation.lat,mySteps[indiceCurrentStep].endLocation.lng);
+
         System.out.println("\t\tconsigne"  + " : " + distanceConsigneNext);
         if (distanceConsigneNext<50){
             donnerConsigne(next,50);
@@ -887,10 +896,9 @@ public class GPS extends AppCompatActivity implements
             toast.show();
         }
     }
-    
-         
+
     public void donnerConsigne(com.google.android.gms.maps.model.LatLng position, int dist){
-        //Permet de lire en audio les instructions   
+        //Permet de lire en audio les instructions
         int index = debutStep.indexOf(position);
         String consigne = instructions[index];
         consigne = consigne.replaceAll("\\<.*?\\>", ""); //On enlève les tags HTML
