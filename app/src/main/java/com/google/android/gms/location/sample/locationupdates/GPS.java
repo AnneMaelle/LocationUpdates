@@ -80,11 +80,24 @@ public class GPS extends AppCompatActivity implements
                 
     //Constante utilisée dans les paramètres de dialogue
     protected static final int REQUEST_CHECK_SETTINGS = 0x1;
+<<<<<<< Updated upstream
                 
     //Intervalle entre chaque mise à jour de Location, il ne faut pas que la valeur soit trop basse   
     public static final long UPDATE_INTERVAL_IN_MILLISECONDS = 30000;
                 
     //Taux de mise à jour de position le plus rapide. Les mises à jour ne seront jamais plus fréquentes
+=======
+
+    /**
+     * The desired interval for location updates. Inexact. Updates may be more or less frequent.
+     */
+    public static final long UPDATE_INTERVAL_IN_MILLISECONDS = 5000;
+
+    /**
+     * The fastest rate for active location updates. Exact. Updates will never be more frequent
+     * than this value.
+     */
+>>>>>>> Stashed changes
     public static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS =
             UPDATE_INTERVAL_IN_MILLISECONDS / 2;
 

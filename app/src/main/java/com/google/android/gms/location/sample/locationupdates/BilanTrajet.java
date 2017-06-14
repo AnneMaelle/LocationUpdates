@@ -62,7 +62,7 @@ public class BilanTrajet extends AppCompatActivity implements OnMapReadyCallback
             if (myRoadScores[i] > 5){
                 myColor = Color.GREEN ; //Hexadecimal code : (0xff00ff00)
             }
-            else if (myRoadScores[i] < 5){
+            else if (myRoadScores[i] < -5){
                 myColor = Color.RED ; //Hexadecimal code : (0xffff0000)
             }
             else if (5 <= myRoadScores[i] || myRoadScores[i] <= 5){
