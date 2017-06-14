@@ -1,6 +1,8 @@
-package Optimisation;
+package com.google.android.gms.location.sample.locationupdates;
 
 import java.util.Vector;
+
+import com.google.android.gms.location.sample.locationupdates.Troncon;
 import com.google.android.gms.maps.model.LatLng;
 
 public class Trajet {
@@ -28,13 +30,13 @@ public class Trajet {
 	
 	public void finDeTrajet(){
 		Troncon t;
-		double distanceTotale;
+		double distanceTotale = 0;
 		for (int i=0; i<nombreTroncon; i++){
 			t=troncons.elementAt(i);
 			EIdeal += t.EIdeal;
 			EReel += t.EReel;
-			noteCO2 += t.dTroncon*t.noteCO2;
-			noteVar += t.dTroncon*t.noteVar;
+			noteCO2 += (double) t.dTroncon*t.noteCO2;
+			noteVar += t.dTroncon*t.noteVar/(t.getIndice2() - t.getIndice1());
 			distanceTotale += t.dTroncon;
 			if (noteCO2 <= 1){
 				noteCO2 = 100;
@@ -43,6 +45,7 @@ public class Trajet {
 			} else {
 				noteCO2 = (float) Math.floor( 100*noteCO2 - 100);
 			}
+			noteVar = ( float ) (noteVar / distanceTotale);
 		}
 		
 	}

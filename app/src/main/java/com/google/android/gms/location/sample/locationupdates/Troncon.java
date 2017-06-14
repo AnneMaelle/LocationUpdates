@@ -4,6 +4,8 @@ package com.google.android.gms.location.sample.locationupdates;
  * Created by Adele on 01/05/2017.
  */
 
+import android.location.Location;
+
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.Vector;
@@ -11,7 +13,10 @@ import java.util.Vector;
 public class Troncon {
 
     public int indice;
-    private float dTroncon, vlim, v0, v2; //paramètres à récupérer grâce à l'API <google Maps
+    public float dTroncon;
+    private float vlim;
+    private float v0;
+    private float v2; //paramètres à récupérer grâce à l'API <google Maps
     private float Kc; //constante du véhicule
     private float a0, a2; //accélaration calculée par optimisation
     private int indice1, indice2;
@@ -35,18 +40,15 @@ public class Troncon {
     }
 
     public double calculationByDistance(double lat1, double long1, double lat2, double long2){
-        double dLat = Math.toRadians(lat2 - lat1);
-        double dLon = Math.toRadians(long2 - long1);
-        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
-                + Math.cos(Math.toRadians(lat1))
-                * Math.cos(Math.toRadians(lat2)) * Math.sin(dLon / 2)
-                * Math.sin(dLon / 2);
-        double c = 2 * Math.asin(Math.sqrt(a));
-        long distanceInMeters = Math.round(6371000 * c);
-        return distanceInMeters;
+        //permet de calculer la distance entre deux positios GPS
+        float[] res = new float[1];
+        res[0] = 0;
+        Location.distanceBetween(lat1, long1, lat2, long2, res);
+        return (res[0]);
     }
 
     private void profilDeVitesse(){
+        //permet de connaître le profil idéal de vitesse en avance
         if (v0<vlim){
             double T1 = (double) (vlim-v0)/a0;
             double d1 = (0.5*a0*T1*T1 + v0*T1);
@@ -128,12 +130,13 @@ public class Troncon {
         EReel = (float) (EReel + Kc*(0.3*pas + 0.028*pas*Math.abs(vitesseActuelle-vitessePrecedente)+sigma));
 
         // calcul de la note "constance de la vitesse
-        if (Math.abs(vitessePrecedente-vitesseActuelle) < 1.*1000./3600.){
-            noteVar = noteVar +1 ;
-        }
+
 
         if ((Double.isNaN((double)indice1))){
             if ((Double.isNaN((double)indice2))){ //cas 4
+                if (Math.abs(vitessePrecedente-vitesseActuelle) < 1.*1000./3600.){
+                    noteVar = noteVar +1;
+                }
                 if (vitesseActuelle > vlim + epsilon){
                     return(1);
                 } else if (vitesseActuelle > vlim - epsilon){
@@ -141,8 +144,12 @@ public class Troncon {
                 } else{
                     return(0);
                 }
+
             } else { //cas 3
                 if (indiceActuel < indice2){ //vitesse constante
+                    if (Math.abs(vitessePrecedente-vitesseActuelle) < 1.*1000./3600.){
+                        noteVar = noteVar +1 ;
+                    }
                     if (vitesseActuelle > vlim + epsilon){
                         return(1);
                     } else if (vitesseActuelle > vlim - epsilon){
@@ -163,6 +170,9 @@ public class Troncon {
             }
         } else {
             if (((Double.isNaN((double)indice2)))){ //cas 1
+                if (Math.abs(vitessePrecedente-vitesseActuelle) < 1.*1000./3600.){
+                    noteVar = noteVar +1;
+                }
                 if (indiceActuel > indice1){ //vitesse constante
                     if (vitesseActuelle > vlim + epsilon){
                         return(1);
@@ -186,6 +196,9 @@ public class Troncon {
                     }
                 } else {
                     if (indiceActuel < indice2){ //vitesse constante
+                        if (Math.abs(vitessePrecedente-vitesseActuelle) < 1.*1000./3600.){
+                            noteVar = noteVar +1;
+                        }
                         if (vitesseActuelle > vlim + epsilon){
                             return(1);
                         } else if (vitesseActuelle > vlim - epsilon){
@@ -207,6 +220,23 @@ public class Troncon {
             }
         }
         return (0);
+    }
+
+    public int getIndice1(){
+        if (indice1 != Double.NaN) {
+            return(indice1);
+        } else {
+            return(0);
+        }
+
+    }
+
+        public int getIndice2(){
+            if (indice2 != Double.NaN) {
+                return(indice2);
+            } else {
+                return(positionsConnues.size());
+        }
     }
 
 }
