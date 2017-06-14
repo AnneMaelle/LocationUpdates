@@ -498,11 +498,11 @@ public class GPS extends AppCompatActivity implements
             notes2[i]=notes.get(i);
         }
 
-        Intent myIntent = new Intent(this,BilanTrajet.class);
-        myIntent.putExtra("Longitudes",);
-        myIntent.putExtra("Latitudes",);
-        myIntent.putExtra("Scores",notes2);
-        startActivity(myIntent);
+        //Intent myIntent = new Intent(this,BilanTrajet.class);
+        //myIntent.putExtra("Longitudes",);
+        //myIntent.putExtra("Latitudes",);
+        //myIntent.putExtra("Scores",notes2);
+        //startActivity(myIntent);
     }
 
     @Override
