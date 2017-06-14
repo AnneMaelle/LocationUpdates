@@ -55,7 +55,7 @@ public class BilanTrajet extends AppCompatActivity implements OnMapReadyCallback
 
         myMap = map;
 
-        // Calcul du score et création du Path pour la Polyline
+        // Calcul du score et création de la Polyline
         myTotalScore += myRoadScores[0];
         for (int i = 1; i < myRoadScores.length; i++) {
             myTotalScore += myRoadScores[i];
