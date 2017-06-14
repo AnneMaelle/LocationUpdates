@@ -631,7 +631,6 @@ public class GPS extends AppCompatActivity implements
         mCurrentLocation = location;
         mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
         positionConducteur();
-        getSpeed(mCurrentLocation);
 
         com.google.android.gms.maps.model.LatLng loc = new com.google.android.gms.maps.model.LatLng(mCurrentLocation.getLatitude(),mCurrentLocation.getLongitude());
         myMap.addMarker(new MarkerOptions().position(loc).title("A"));
@@ -685,18 +684,17 @@ public class GPS extends AppCompatActivity implements
     }
 
     //Calcul de la vitesse
-    private void getSpeed(Location location){
+    private void getSpeed(Location newLocation, Location veryOldLocation){
         double newTime = System.currentTimeMillis()/1000;
-        double newLat = location.getLatitude();
-        double newLon = location.getLongitude();
-        double oldLat = oldLocation.getLatitude();
-        double oldLon = oldLocation.getLongitude();
+        double newLat = newLocation.getLatitude();
+        double newLon = newLocation.getLongitude();
+        double oldLat = veryOldLocation.getLatitude();
+        double oldLon = veryOldLocation.getLongitude();
 
         double distance = calculationByDistance(newLat,newLon,oldLat,oldLon);
         double timeDifferent = newTime - currentTime;
         currentSpeed = distance*3.6/timeDifferent;
         currentTime = newTime;
-        oldLocation = location;
         double diffLat = abs(newLat-oldLat);
         double diffLong = abs(newLon-oldLon);
         System.out.println("\t\tspeed " + currentSpeed);
@@ -769,34 +767,39 @@ public class GPS extends AppCompatActivity implements
         int i = 0;
         double epsilon = (double) 3*10/36;
         int  conseil = 9;
-        double precision = 1;
+        double dTot =0;
+        double oldD =0;
+        double newD = 0;
+        double precision = Math.min(mCurrentLocation.getAccuracy(),oldLocation.getAccuracy());
         double distance = calculationByDistance(oldLocation.getLatitude(), oldLocation.getLongitude(), mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
         System.out.println("\t\tposition lat"  + " : " + mCurrentLocation.getLatitude() + ", position long : "  + mCurrentLocation.getLongitude());
-        System.out.println("\t\t ancienne position lat"  + " : " + oldLocation.getLatitude() + ", position long : "  + oldLocation.getLongitude());
+        System.out.println("\t\tancienne position lat"  + " : " + oldLocation.getLatitude() + ", position long : "  + oldLocation.getLongitude());
         System.out.println("\t\tdistance1"  + " : " + distance);
+        System.out.println("\t\tPrecision : " + precision);
         if (distance > precision){
             System.out.println("\t\tboucle if");
-            double distanceEntreDeuxPointsConnus = calculationByDistance(trajetPredit.get(indiceDernierePos).latitude, trajetPredit.get(indiceDernierePos).longitude,
-                    trajetPredit.get(indiceDernierePos + 1).latitude,trajetPredit.get(indiceDernierePos + 1).longitude);
-            double distancePos = calculationByDistance(trajetPredit.get(indiceDernierePos).latitude, trajetPredit.get(indiceDernierePos).longitude,
-                    mCurrentLocation.getLatitude(),mCurrentLocation.getLongitude());
-            System.out.println("\t\tdistancePos"  + " : " + distancePos);
-
-            if (distanceEntreDeuxPointsConnus < distancePos) {
-                while (distanceEntreDeuxPointsConnus < distancePos) {
-                    indiceDernierePos++;
-                    distanceEntreDeuxPointsConnus += calculationByDistance(trajetPredit.get(indiceDernierePos).latitude, trajetPredit.get(indiceDernierePos).longitude,
-                            trajetPredit.get(indiceDernierePos + 1).latitude, trajetPredit.get(indiceDernierePos + 1).longitude);
-                    System.out.println("\t\tdistanceEntreDeuxPoints" + " : " + distanceEntreDeuxPointsConnus);
-                }
-
-
-                oldSpeed = currentSpeed;
-                currentSpeed = distancePos / 10;
-                conseil = t.conseil(currentSpeed, oldSpeed, indiceDernierePos, epsilon);
-                this.donnerConseil(conseil);
-                oldLocation = mCurrentLocation;
+            while (dTot < distance && oldD > newD){
+                indiceDernierePos++;
+                oldD = newD;
+                newD = calculationByDistance(trajetPredit.get(indiceDernierePos).latitude, trajetPredit.get(indiceDernierePos).longitude,
+                        mCurrentLocation.getLatitude(),mCurrentLocation.getLongitude());
+                dTot+= newD;
+            };
+            double dGauche = 0;
+            if (indiceDernierePos > 0) {
+                dGauche = Math.abs(calculationByDistance(trajetPredit.get(indiceDernierePos).latitude, trajetPredit.get(indiceDernierePos).longitude,
+                        trajetPredit.get(indiceDernierePos - 1).latitude, trajetPredit.get(indiceDernierePos - 1).longitude) - newD);
             }
+            double dDroite = Math.abs(calculationByDistance(trajetPredit.get(indiceDernierePos).latitude, trajetPredit.get(indiceDernierePos).longitude,
+                    trajetPredit.get(indiceDernierePos + 1).latitude,trajetPredit.get(indiceDernierePos + 1).longitude) - newD);
+            if (dGauche < dDroite && indiceDernierePos > 0) {
+                indiceDernierePos -= 1;
+            }
+
+            getSpeed(mCurrentLocation, oldLocation);
+            conseil = t.conseil(currentSpeed, oldSpeed, indiceDernierePos, epsilon);
+            this.donnerConseil(conseil);
+            oldLocation = mCurrentLocation;
         }
     }
 
