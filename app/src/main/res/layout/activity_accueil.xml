@@ -26,14 +26,15 @@
     <ImageView
         android:id="@+id/backgroundDeco"
         android:layout_width="match_parent"
-        android:layout_height="100dp"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true" />
+        android:layout_alignParentLeft="true"
+        android:background="@drawable/background"/>
 
     <ImageButton
         android:id="@+id/profileButton"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
         android:layout_marginLeft="50dp"
         android:layout_marginTop="100dp"
         android:clickable="true"
@@ -53,8 +54,8 @@
 
     <ImageButton
         android:id="@+id/parametersButton"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
         android:layout_alignTop="@+id/profileButton"
         android:clickable="true"
         android:onClick="goParameters"
