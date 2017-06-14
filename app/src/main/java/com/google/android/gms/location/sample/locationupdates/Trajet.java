@@ -32,22 +32,22 @@ public class Trajet /*implements Parcelable*/{
 	public void finDeTrajet(){
 		Troncon t;
 		double distanceTotale=0;
+		double distanceCst = 0;
 		for (int i=0; i<nombreTroncon; i++){
 			t=troncons.elementAt(i);
 			EIdeal += t.EIdeal;
 			EReel += t.EReel;
 
-			noteVar += t.getdTroncon()*t.noteVar/(t.getIndice2() - t.getIndice1());
-			noteVar += t.getdTroncon()*t.noteVar;
+			noteVar += t.noteVar*(t.getIndice2() - t.getIndice1());
+			noteCO2 += t.getdTroncon()*t.noteCO2;
 			distanceTotale += t.getdTroncon();
-			if (noteCO2 <= 1){
+			distanceCst += t.getIndice2()-t.getIndice1();
+			if (noteCO2 > 1){
 				noteCO2 = 100;
-			}else if (noteCO2 >= 2){
-				noteCO2 = 0;
-			} else {
-				noteCO2 = (float) Math.floor( 100*noteCO2 - 100);
+			}else {
+				noteCO2 = noteCO2*100;
 			}
-			noteVar = ( float ) (noteVar / distanceTotale);
+			noteVar = ( float ) (noteVar / distanceCst);
 		}
 		
 	}

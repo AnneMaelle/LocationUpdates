@@ -128,7 +128,7 @@ public class Troncon {
             sigma = vitesseActuelle*vitesseActuelle - vitessePrecedente*vitessePrecedente;
         }
         EReel = (float) (EReel + Kc*(0.3*pas + 0.028*pas*Math.abs(vitesseActuelle-vitessePrecedente)+sigma));
-
+        noteCO2 = EIdeal/EReel;
         // calcul de la note "constance de la vitesse
 
 
