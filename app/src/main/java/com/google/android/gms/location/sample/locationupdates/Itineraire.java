@@ -11,7 +11,7 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 
-public class Itineraire extends AppCompatActivity implements TextWatcher {
+public class Itineraire extends AppCompatActivity {
 
     private EditText fromPoint ; // zone de saisie du point de départ
     private EditText toPoint; // zone de saisie du point d'arrivée
@@ -32,8 +32,7 @@ public class Itineraire extends AppCompatActivity implements TextWatcher {
         fromPoint = (EditText) findViewById(R.id.from) ;
     }
 
-    @Override
-    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+    /*public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
     }
 
@@ -43,9 +42,9 @@ public class Itineraire extends AppCompatActivity implements TextWatcher {
 
     @Override
     public void afterTextChanged(Editable editable) {
-        CharSequence s = editable.
+        CharSequence s = editable
         System.out.println("\t\tonTextchanged"  + " : " + s);
-    }
+    }*/
 
     /*public boolean onKey(View myView, int keyCode, KeyEvent event){
         System.out.println("\t\tkeyCode"  + " : " + event.getKeyCode());
@@ -61,15 +60,11 @@ public class Itineraire extends AppCompatActivity implements TextWatcher {
             }
         }
         return false;
-<<<<<<< Updated upstream
     }
-    
-    // Passage à l'activité GPS sans itinéraire
-    // Pour l'instant, renvoie une erreur car l'activité suivante calcule un itinéraire sur le onCreate
-=======
+
     }*/
 
->>>>>>> Stashed changes
+    // Passage à l'activité GPS sans itinéraire
     public void goNoItineraryGPS(View myView){
         Intent gpsIntent = new Intent(this, GPS.class);
         startActivity(gpsIntent);
