@@ -32,12 +32,13 @@
 
     <ImageButton
         android:id="@+id/profileButton"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_marginLeft="70dp"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginLeft="50dp"
         android:layout_marginTop="100dp"
         android:clickable="true"
-        android:onClick="goProfile" />
+        android:onClick="goProfile"
+        android:background="@drawable/profile"/>
 
     <TextView
         android:id="@+id/profileText"
@@ -52,13 +53,14 @@
 
     <ImageButton
         android:id="@+id/parametersButton"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         android:layout_alignTop="@+id/profileButton"
         android:clickable="true"
         android:onClick="goParameters"
         android:layout_alignParentRight="true"
-        android:layout_marginRight="70dp" />
+        android:layout_marginRight="50dp"
+        android:background="@drawable/parameters"/>
 
     <TextView
         android:id="@+id/parametersText"
@@ -71,14 +73,15 @@
         android:layout_alignParentRight="true"
         android:layout_marginRight="40dp" />
 
-    <Button
+    <ImageButton
         android:id="@+id/goButton"
-        android:text="Go"
         android:layout_width="200dp"
-        android:layout_height="70dp"
+        android:layout_height="120dp"
         android:onClick="goItin"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/parametersText"
+        android:layout_marginTop="50dp"
+        android:background="@drawable/hat"/>
 
     <TextView
         android:id="@+id/goText"

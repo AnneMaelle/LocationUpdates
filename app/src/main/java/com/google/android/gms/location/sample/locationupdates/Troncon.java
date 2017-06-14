@@ -13,7 +13,7 @@ public class Troncon {
     public int indice;
     private float dTroncon, vlim, v0, v2; //paramètres à récupérer grâce à l'API <google Maps
     private float Kc; //constante du véhicule
-    private float a0, a2; //accélaration calcuclée par optimisation
+    private float a0, a2; //accélaration calculée par optimisation
     private int indice1, indice2;
     private float pas;
     public Vector<LatLng> positionsConnues;

@@ -22,7 +22,7 @@ public class BilanTrajet extends AppCompatActivity implements OnMapReadyCallback
     protected GoogleMap myMap;
 
     //Values
-    protected int[] myRoadScores;
+    protected float[] myRoadScores;
     protected int myTotalScore = 0;
     protected float[] myRoadLong;
     protected float[] myRoadLat;
@@ -47,7 +47,7 @@ public class BilanTrajet extends AppCompatActivity implements OnMapReadyCallback
         Intent myIntent = getIntent();
         myRoadLong = myIntent.getFloatArrayExtra("Longitudes");
         myRoadLat = myIntent.getFloatArrayExtra("Latitudes");
-        myRoadScores = myIntent.getIntArrayExtra("Scores");
+        myRoadScores = myIntent.getFloatArrayExtra("Scores");
 
     }
 
@@ -55,7 +55,7 @@ public class BilanTrajet extends AppCompatActivity implements OnMapReadyCallback
 
         myMap = map;
 
-        // Calcul du score et création du Path pour la Polyline
+        // Calcul du score et création de la Polyline
         myTotalScore += myRoadScores[0];
         for (int i = 1; i < myRoadScores.length; i++) {
             myTotalScore += myRoadScores[i];
