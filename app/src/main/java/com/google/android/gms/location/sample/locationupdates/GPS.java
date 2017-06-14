@@ -702,12 +702,22 @@ public class GPS extends AppCompatActivity implements
         System.out.println("\t\tspeed " + currentSpeed);
     }
     public double calculationByDistance(double lat1, double long1, double lat2, double long2){
+<<<<<<< Updated upstream
         float[] res = new float[1];
         res[0] = 0;
         Location.distanceBetween(lat1, long1, lat2, long2, res);
         return (res[0]);
 
 
+=======
+
+        double theta = long1 - long2;
+        double dist = Math.sin(Math.toRadians(lat1)) * Math.sin(Math.toRadians(lat2)) + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) * Math.cos(Math.toRadians(theta));
+        dist = Math.acos(dist);
+        dist = Math.toDegrees(dist);
+        dist = dist * 60 * 1.1515* 1.609344;
+        return (dist);
+>>>>>>> Stashed changes
     }
     
 
