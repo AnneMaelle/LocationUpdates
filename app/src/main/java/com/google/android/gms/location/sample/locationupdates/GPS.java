@@ -635,6 +635,7 @@ public class GPS extends AppCompatActivity implements
      */
     @Override
     public void onLocationChanged(Location location) {
+        // Contrôle la mise à jour de données de position
         mCurrentLocation = location;
         mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
         positionConducteur();
@@ -691,8 +692,9 @@ public class GPS extends AppCompatActivity implements
         return super.onOptionsItemSelected(item);
     }
 
-    //Calcul de la vitesse
+
     private void getSpeed(Location location){
+        //Calcul de la vitesse
         double newTime = System.currentTimeMillis()/1000;
         double newLat = location.getLatitude();
         double newLon = location.getLongitude();
@@ -709,8 +711,10 @@ public class GPS extends AppCompatActivity implements
         System.out.println("\t\tspeed " + currentSpeed);
     }
                 
-    public double calculationByDistance(double lat1, double long1, double lat2, double long2){
 
+    public double calculationByDistance(double lat1, double long1, double lat2, double long2){
+        // Calcul de la distance entre deux points
+        // Utile pour la détermination de la distance à la prochaine consigne d'itinéraire, 
         float[] res = new float[1];
         res[0] = 0;
         Location.distanceBetween(lat1, long1, lat2, long2, res);
@@ -722,6 +726,7 @@ public class GPS extends AppCompatActivity implements
         myMap = map;
         PolylineOptions polyOpt = new PolylineOptions();
 
+        // Trace notre itinéraire
         for (int s=0; s<myPolylines.length;s++) {
 
             List<LatLng> poly = myPolylines[s].decodePath();
@@ -731,7 +736,8 @@ public class GPS extends AppCompatActivity implements
                 polyOpt.add(myLatLng);
             }
         }
-
+            
+        // Place notre point de départ et notre point d'arrivée sur la carte
         debutStep = new Vector<>();
         for (int i=0; i<mySteps.length; i++){
             com.google.android.gms.maps.model.LatLng myStart = new com.google.android.gms.maps.model.LatLng(mySteps[i].startLocation.lat,mySteps[i].startLocation.lng);
@@ -769,12 +775,14 @@ public class GPS extends AppCompatActivity implements
         }
 
     }
+                
     private void speakOut(String txtText) {
+        // Lit les conseils/consignes
         tts.speak(txtText, TextToSpeech.QUEUE_FLUSH, null);
     }
 
-    // Définit la position du conducteur pour pouvoir exécuter la lecture de la consigne d'itinéraire ou non.
     public void positionConducteur(){
+        // Définit la position du conducteur pour pouvoir exécuter la lecture de la consigne d'itinéraire ou non.
         int i = 0;
         double epsilon = (double) 3*10/36;
         int  conseil = 9;
@@ -811,10 +819,10 @@ public class GPS extends AppCompatActivity implements
         }
     }
 
-    // Détermine si on est proches ou pas d'une consigne d'itinéraire.
-    // Permet de lancer donneConsigne 50m avant l'exécution de l'instruction par le conducteur.
+    
     public void procheConsigne(){
-
+        // Détermine si on est proches ou pas d'une consigne d'itinéraire.
+        // Permet de lancer donneConsigne 50m avant l'exécution de l'instruction par le conducteur.
         int indiceStep = indiceCurrentStep;
         double distanceConsigneNext;
         com.google.android.gms.maps.model.LatLng next= new com.google.android.gms.maps.model.LatLng(mySteps[indiceCurrentStep].endLocation.lat,mySteps[indiceCurrentStep].endLocation.lng);
@@ -834,12 +842,11 @@ public class GPS extends AppCompatActivity implements
             }
         }
     }
-                
-    // Création des conseils d'éco-conduite.
-    // Affichage des conseils sous forme de Toast ici,
-    // dans un développement futur, il faudrait les faire lire par TextToSpeech.
-                
-    public void donnerConseil(int conseil){
+             
+    public void donnerConseil(int conseil){             
+        // Création des conseils d'éco-conduite.
+        // Affichage des conseils sous forme de Toast ici,
+        // dans un développement futur, il faudrait les faire lire par TextToSpeech.
         Context context = getApplicationContext();
         String txt = "";
         // à compléter : conditions
@@ -879,8 +886,9 @@ public class GPS extends AppCompatActivity implements
         }
     }
     
-    //Permet de lire en audio les instructions            
+         
     public void donnerConsigne(com.google.android.gms.maps.model.LatLng position, int dist){
+        //Permet de lire en audio les instructions   
         int index = debutStep.indexOf(position);
         String consigne = instructions[index];
         consigne = consigne.replaceAll("\\<.*?\\>", ""); //On enlève les tags HTML
