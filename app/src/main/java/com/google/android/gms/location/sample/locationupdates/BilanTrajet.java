@@ -22,7 +22,7 @@ public class BilanTrajet extends AppCompatActivity implements OnMapReadyCallback
     protected GoogleMap myMap;
 
     //Values
-    protected int[] myRoadScores;
+    protected float[] myRoadScores;
     protected int myTotalScore = 0;
     protected float[] myRoadLong;
     protected float[] myRoadLat;
@@ -47,7 +47,7 @@ public class BilanTrajet extends AppCompatActivity implements OnMapReadyCallback
         Intent myIntent = getIntent();
         myRoadLong = myIntent.getFloatArrayExtra("Longitudes");
         myRoadLat = myIntent.getFloatArrayExtra("Latitudes");
-        myRoadScores = myIntent.getIntArrayExtra("Scores");
+        myRoadScores = myIntent.getFloatArrayExtra("Scores");
 
     }
 
