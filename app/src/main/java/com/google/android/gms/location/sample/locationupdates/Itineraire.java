@@ -11,11 +11,11 @@ import android.widget.EditText;
 
 public class Itineraire extends AppCompatActivity implements View.OnKeyListener {
 
-    private EditText fromPoint ;
-    private EditText toPoint;
-    private String origin ;
-    private String destination ;
-    private boolean originGiven;
+    private EditText fromPoint ; // zone de saisie du point de départ
+    private EditText toPoint; // zone de saisie du point d'arrivée
+    private String origin ; // point de départ à envoyer à l'activité GPS
+    private String destination ; // destination à envoyer à l'activité GPS
+    private boolean originGiven; // permettra d'envoyer l'information que le point de départ est "ma position" à l'activité GPS
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,17 +47,21 @@ public class Itineraire extends AppCompatActivity implements View.OnKeyListener 
         }
         return false;
     }
-
+    
+    // Passage à l'activité GPS sans itinéraire
+    // Pour l'instant, renvoie une erreur car l'activité suivante calcule un itinéraire sur le onCreate
     public void goNoItineraryGPS(View myView){
         Intent gpsIntent = new Intent(this, GPS.class);
         startActivity(gpsIntent);
     }
 
+    // Permet l'utilisation de "ma position" comme point de départ
     public void originGivenMethod(View myView){
         originGiven = false;
         fromPoint.setText("Ma position");
     }
 
+    // Passage à l'activité GPS en utilisant un point de départ et une destination
     public void goGPS(View myView){
         origin = fromPoint.getText().toString();
         destination = toPoint.getText().toString();
@@ -68,6 +72,7 @@ public class Itineraire extends AppCompatActivity implements View.OnKeyListener 
         startActivity(gpsIntent);
     }
 
+    // Réinitialisation des points de départ et d'arrivée lors du retour sur cette activité
     @Override
     protected void onResume() {
         super.onResume();
