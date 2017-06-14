@@ -831,13 +831,14 @@ public class GPS extends AppCompatActivity implements
             //après avoir trouvé le point le plus proche dans la liste, on veut savoir si la mesure est
             // à "gauche" ou à "droite dans la liste (c'est à dire quel est le deuxième point le plus proche)
             double dGauche = 0;
+            double dDroite = 0;
             if (indiceDernierePos > 0) {
                 dGauche = Math.abs(calculationByDistance(trajetPredit.get(indiceDernierePos).latitude, trajetPredit.get(indiceDernierePos).longitude,
                         trajetPredit.get(indiceDernierePos - 1).latitude, trajetPredit.get(indiceDernierePos - 1).longitude) - newD);
             }
 
-            if (indiceDernierePos < trajetPredit.size){
-                double dDroite = Math.abs(calculationByDistance(trajetPredit.get(indiceDernierePos).latitude, trajetPredit.get(indiceDernierePos).longitude,
+            if (indiceDernierePos < trajetPredit.size()){
+                dDroite = Math.abs(calculationByDistance(trajetPredit.get(indiceDernierePos).latitude, trajetPredit.get(indiceDernierePos).longitude,
                         trajetPredit.get(indiceDernierePos + 1).latitude,trajetPredit.get(indiceDernierePos + 1).longitude) - newD);
 
             }
