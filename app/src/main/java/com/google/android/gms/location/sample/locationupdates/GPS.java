@@ -630,12 +630,12 @@ public class GPS extends AppCompatActivity implements
     public void onLocationChanged(Location location) {
         mCurrentLocation = location;
         mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
+        positionConducteur();
         getSpeed(mCurrentLocation);
 
         com.google.android.gms.maps.model.LatLng loc = new com.google.android.gms.maps.model.LatLng(mCurrentLocation.getLatitude(),mCurrentLocation.getLongitude());
         myMap.addMarker(new MarkerOptions().position(loc).title("A"));
         myMap.moveCamera(CameraUpdateFactory.newLatLngZoom(loc, 17));
-        positionConducteur();
         updateLocationUI();
 
         procheConsigne();
@@ -702,16 +702,15 @@ public class GPS extends AppCompatActivity implements
         System.out.println("\t\tspeed " + currentSpeed);
     }
     public double calculationByDistance(double lat1, double long1, double lat2, double long2){
-        double dLat = Math.toRadians(lat2 - lat1);
-        double dLon = Math.toRadians(long2 - long1);
-        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
-                + Math.cos(Math.toRadians(lat1))
-                * Math.cos(Math.toRadians(lat2)) * Math.sin(dLon / 2)
-                * Math.sin(dLon / 2);
-        double c = 2 * Math.asin(Math.sqrt(a));
-        long distanceInMeters = Math.round(6371000 * c);
-        return distanceInMeters;
+    
+        double theta = lon1 - lon2;
+        double dist = Math.sin(deg2rad(lat1)) * Math.sin(deg2rad(lat2)) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.cos(deg2rad(theta));
+        dist = Math.acos(dist);
+        dist = rad2deg(dist);
+        dist = dist * 60 * 1.1515* 1.609344;
+        return (dist);
     }
+    
 
     public void onMapReady(GoogleMap map){
         myMap = map;
@@ -768,46 +767,41 @@ public class GPS extends AppCompatActivity implements
     }
 
     public void positionConducteur(){
-        System.out.println("\t\tpositionConducteur"  + " :jeSuisRentrée");
         int i = 0;
         double epsilon = (double) 3*10/36;
         int  conseil = 9;
-        double precision = 0;
-        double distanceEntreDeuxPointsConnus = 0;
-        double distancePos = 0 ;
-
-        precision = 1;
-
-        if (calculationByDistance(oldLocation.getLatitude(), oldLocation.getLongitude(), mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude()) > precision){
-
-            distanceEntreDeuxPointsConnus = calculationByDistance(trajetPredit.get(indiceDernierePos).latitude, trajetPredit.get(indiceDernierePos).longitude,
+        double precision = 1;
+        double distance = calculationByDistance(oldLocation.getLatitude(), oldLocation.getLongitude(),
+                mCurrentLocation.getLatitude(), mCurrentLocation.getLatitude());
+        System.out.println("\t\tposition lat"  + " : " + mCurrentLocation.getLatitude() + ", position long : "  + mCurrentLocation.getLongitude());
+        System.out.println("\t\t ancienne position lat"  + " : " + oldLocation.getLatitude() + ", position long : "  + oldLocation.getLongitude());
+        System.out.println("\t\tdistance1"  + " : " + distance);
+        if (distance > precision){
+            System.out.println("\t\tboucle if");
+            double distanceEntreDeuxPointsConnus = calculationByDistance(trajetPredit.get(indiceDernierePos).latitude, trajetPredit.get(indiceDernierePos).longitude,
                     trajetPredit.get(indiceDernierePos + 1).latitude,trajetPredit.get(indiceDernierePos + 1).longitude);
-            distancePos = calculationByDistance(trajetPredit.get(indiceDernierePos).latitude, trajetPredit.get(indiceDernierePos).longitude,
+            double distancePos = calculationByDistance(trajetPredit.get(indiceDernierePos).latitude, trajetPredit.get(indiceDernierePos).longitude,
                     mCurrentLocation.getLatitude(),mCurrentLocation.getLongitude());
             System.out.println("\t\tdistancePos"  + " : " + distancePos);
 
             if (distanceEntreDeuxPointsConnus < distancePos) {
-                while (distanceEntreDeuxPointsConnus<distancePos){
-                    indiceDernierePos ++;
+                while (distanceEntreDeuxPointsConnus < distancePos) {
+                    indiceDernierePos++;
                     distanceEntreDeuxPointsConnus += calculationByDistance(trajetPredit.get(indiceDernierePos).latitude, trajetPredit.get(indiceDernierePos).longitude,
-                            trajetPredit.get(indiceDernierePos + 1).latitude,trajetPredit.get(indiceDernierePos + 1).longitude);
-                    System.out.println("\t\tdistanceEntreDeuxPointsConnus"  + " : " + distanceEntreDeuxPointsConnus);
+                            trajetPredit.get(indiceDernierePos + 1).latitude, trajetPredit.get(indiceDernierePos + 1).longitude);
+                    System.out.println("\t\tdistanceEntreDeuxPoints" + " : " + distanceEntreDeuxPointsConnus);
                 }
-            }
 
-            oldLocation = mCurrentLocation;
-            oldSpeed = currentSpeed;
-            currentSpeed = distancePos/10;
-            conseil = t.conseil(currentSpeed, oldSpeed, indiceDernierePos, epsilon);
-            this.donnerConseil(conseil);
 
-            try {
-                Thread.sleep(10000);
-            } catch (Exception e) {
+                oldSpeed = currentSpeed;
+                currentSpeed = distancePos / 10;
+                conseil = t.conseil(currentSpeed, oldSpeed, indiceDernierePos, epsilon);
+                this.donnerConseil(conseil);
+                oldLocation = mCurrentLocation;
             }
         }
-
     }
+
     public void procheConsigne(){
 
         int indiceStep = indiceCurrentStep;
