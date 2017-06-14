@@ -152,6 +152,7 @@ public class GPS extends AppCompatActivity implements
     DirectionsStep[] mySteps;
     Vector<com.google.android.gms.maps.model.LatLng> debutStep;
     int indiceCurrentStep;
+    int indiceOldStep = -1;
     EncodedPolyline[] myPolylines;
     String[] instructions;
     int[] indexInstructions;
@@ -160,7 +161,6 @@ public class GPS extends AppCompatActivity implements
     Troncon t;
 
     boolean consigne100 = false;
-    boolean consigne50 = false;
 
     int indiceDernierePos = 0;
 
@@ -852,7 +852,7 @@ public class GPS extends AppCompatActivity implements
             oldLocation = mCurrentLocation;
         }
     }
-    
+
     public void procheConsigne(int indiceStep){
         // Détermine si on est proches ou pas d'une consigne d'itinéraire.
         // Permet de lancer donneConsigne 50m avant l'exécution de l'instruction par le conducteur.
@@ -866,10 +866,11 @@ public class GPS extends AppCompatActivity implements
                 mySteps[indiceStep].endLocation.lat,mySteps[indiceStep].endLocation.lng);
 
         System.out.println("\t\tconsigne"  + " : " + distanceConsigneNext);
-        if (distanceConsigneNext<300 & !consigne50){
-            donnerConsigne(next,50);
-            indiceCurrentStep++;
-            consigne50 = true;
+        if(indiceOldStep!=indiceStep) {
+            if (distanceConsigneNext < 300) {
+                donnerConsigne(next, 50);
+                indiceOldStep = indiceStep;
+            }
         }
 
         System.out.println("\t\tconsigne"  + " 2e if: " + mySteps[indiceStep].distance.inMeters);

@@ -4,20 +4,24 @@ package com.google.android.gms.location.sample.locationupdates;
  * Created by Adele on 01/05/2017.
  */
 
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.os.Parcelable.Creator;
+
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.Vector;
 
-public class Troncon {
+public class Troncon implements Parcelable{
 
     public int indice;
     private float dTroncon, vlim, v0, v2; //paramètres à récupérer grâce à l'API <google Maps
     private float Kc; //constante du véhicule
     private float a0, a2; //accélaration calculée par optimisation
     private int indice1, indice2;
-    private float pas;
     public Vector<LatLng> positionsConnues;
     public float EIdeal, EReel; //CO2 rejeté
+    public float pas;
     public float noteCO2, noteVar;
 
     public Troncon(int i, float d, float vitLim, float vit0, float vit2, Vector<LatLng> positions) {
@@ -210,6 +214,61 @@ public class Troncon {
     public float getdTroncon(){
         return dTroncon;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(indice);
+        dest.writeInt(indice1);
+        dest.writeInt(indice2);
+        dest.writeFloat(dTroncon);
+        dest.writeFloat(vlim);
+        dest.writeFloat(v0);
+        dest.writeFloat(v2);
+        dest.writeFloat(Kc);
+        dest.writeFloat(a0);
+        dest.writeFloat(a2);
+        dest.writeTypedList(positionsConnues);
+        dest.writeFloat(noteCO2);
+        dest.writeFloat(noteVar);
+        dest.writeFloat(EIdeal);
+        dest.writeFloat(EReel);
+        dest.writeFloat(pas);
+    }
+
+    public Troncon(Parcel in){
+        this.positionsConnues = new Vector<>();
+        in.readTypedList(positionsConnues,LatLng.CREATOR);
+        this.dTroncon = in.readFloat();
+        this.vlim = in.readFloat();
+        this.v0 = in.readFloat();
+        this.noteCO2 = in.readFloat();
+        this.noteVar = in.readFloat();
+        this.v2 = in.readFloat();
+        this.a0 = in.readFloat();
+        this.a2 = in.readFloat();
+        this.indice = in.readInt();
+        this.indice1 = in.readInt();
+        this.indice2 = in.readInt();
+        this.EIdeal = in.readFloat();
+        this.EReel = in.readFloat();
+        this.pas = in.readFloat();
+    }
+
+    static final Parcelable.Creator<Troncon> CREATOR = new Parcelable.Creator<Troncon>(){
+        @Override
+        public Troncon createFromParcel(Parcel source) {
+        return new Troncon(source);
+    }
+        @Override
+        public Troncon[] newArray(int size) {
+            return new Troncon[size];
+        }
+    };
 
 }
 
