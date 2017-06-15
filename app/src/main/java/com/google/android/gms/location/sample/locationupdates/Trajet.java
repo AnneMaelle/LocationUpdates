@@ -37,6 +37,9 @@ public class Trajet implements Parcelable{
 		Troncon t;
 		double distanceTotale=0;
 		double distanceCst = 0;
+        listeNoteVar = new float[nombreTroncon];
+        polylineOptions = new PolylineOptions[nombreTroncon];
+
 		for (int i=0; i<nombreTroncon; i++){
 			t=troncons.elementAt(i);
 			EIdeal += t.EIdeal;
@@ -87,15 +90,14 @@ public class Trajet implements Parcelable{
     protected Trajet(Parcel in){
         this.troncons = new Vector<>();
         in.readTypedList(troncons,Troncon.CREATOR);
+        this.polylineOptions = new PolylineOptions[troncons.size()];
+        in.readTypedArray(polylineOptions,PolylineOptions.CREATOR);
+        this.nombreTroncon = in.readInt();
         this.EIdeal = in.readFloat();
         this.EReel = in.readFloat();
-        this.nombreTroncon = in.readInt();
         this.noteCO2 = in.readFloat();
         this.noteVar = in.readFloat();
         this.listeNoteVar = new float[troncons.size()];
         in.readFloatArray(listeNoteVar);
-        this.polylineOptions = new PolylineOptions[troncons.size()];
-        in.readTypedArray(polylineOptions,PolylineOptions.CREATOR);
-
     }
 }

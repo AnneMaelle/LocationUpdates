@@ -8,6 +8,7 @@ import android.widget.TextView;
 import android.support.v7.widget.Toolbar;
 
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -24,8 +25,6 @@ public class BilanTrajet extends AppCompatActivity implements OnMapReadyCallback
     //Values
     protected float[] myRoadScores;
     protected int myTotalScore = 0;
-    protected float[] myRoadLong;
-    protected float[] myRoadLat;
     protected int myColor;
     protected Trajet trajet;
     protected PolylineOptions[] polylineOptions;
@@ -73,5 +72,6 @@ public class BilanTrajet extends AppCompatActivity implements OnMapReadyCallback
             polylineOptions[i].color(myColor);
             myRoad = myMap.addPolyline(polylineOptions[i]);
         }
+        myMap.moveCamera(CameraUpdateFactory.newLatLngZoom(trajet.getTroncons().lastElement().positionsConnues.lastElement(), 10));
     }
 }

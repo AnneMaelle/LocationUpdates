@@ -252,11 +252,11 @@ public class Troncon implements Parcelable{
         return dTroncon;
     }
 
+    //Permet de faire passer un Troncon avec un intent
     @Override
     public int describeContents() {
         return 0;
     }
-
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(indice);
@@ -277,28 +277,27 @@ public class Troncon implements Parcelable{
         dest.writeFloat(pas);
         dest.writeTypedArray(polylineOptions,0);
     }
-
     public Troncon(Parcel in){
-        this.positionsConnues = new Vector<>();
-        in.readTypedList(positionsConnues,LatLng.CREATOR);
-        this.dTroncon = in.readFloat();
-        this.vlim = in.readFloat();
-        this.v0 = in.readFloat();
-        this.noteCO2 = in.readFloat();
-        this.noteVar = in.readFloat();
-        this.v2 = in.readFloat();
-        this.a0 = in.readFloat();
-        this.a2 = in.readFloat();
         this.indice = in.readInt();
         this.indice1 = in.readInt();
         this.indice2 = in.readInt();
+        this.dTroncon = in.readFloat();
+        this.vlim = in.readFloat();
+        this.v0 = in.readFloat();
+        this.v2 = in.readFloat();
+        this.Kc = in.readFloat();
+        this.a0 = in.readFloat();
+        this.a2 = in.readFloat();
+        this.positionsConnues = new Vector<>();
+        in.readTypedList(positionsConnues,LatLng.CREATOR);
+        this.noteCO2 = in.readFloat();
+        this.noteVar = in.readFloat();
         this.EIdeal = in.readFloat();
         this.EReel = in.readFloat();
         this.pas = in.readFloat();
         this.polylineOptions=new PolylineOptions[1];
         in.readTypedArray(polylineOptions,PolylineOptions.CREATOR);
     }
-
     static final Parcelable.Creator<Troncon> CREATOR = new Parcelable.Creator<Troncon>(){
         @Override
         public Troncon createFromParcel(Parcel source) {
@@ -309,7 +308,6 @@ public class Troncon implements Parcelable{
             return new Troncon[size];
         }
     };
-
     public void setPas(float timeDifference){
         pas = timeDifference;
     }
