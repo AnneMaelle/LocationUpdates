@@ -12,6 +12,7 @@ import android.location.Location;
 
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.Vector;
 
@@ -29,8 +30,9 @@ public class Troncon implements Parcelable{
     public float EIdeal, EReel; //CO2 rejeté
     public float pas;
     public float noteCO2, noteVar;
+    PolylineOptions[] polylineOptions =new PolylineOptions[1];
 
-    public Troncon(int i, float d, float vitLim, float vit0, float vit2, Vector<LatLng> positions) {
+    public Troncon(int i, float d, float vitLim, float vit0, float vit2, Vector<LatLng> positions,PolylineOptions polylineOptions) {
         indice = i;
         dTroncon = d;
         vlim = vitLim;
@@ -42,6 +44,7 @@ public class Troncon implements Parcelable{
         positionsConnues = positions;
         this.profilDeVitesse();
         this.calculEIdeal();
+        this.polylineOptions[0] = polylineOptions;
     }
 
     public double calculationByDistance(double lat1, double long1, double lat2, double long2){
@@ -248,7 +251,7 @@ public class Troncon implements Parcelable{
     public float getdTroncon(){
         return dTroncon;
     }
-    
+
     @Override
     public int describeContents() {
         return 0;
@@ -272,6 +275,7 @@ public class Troncon implements Parcelable{
         dest.writeFloat(EIdeal);
         dest.writeFloat(EReel);
         dest.writeFloat(pas);
+        dest.writeTypedArray(polylineOptions,0);
     }
 
     public Troncon(Parcel in){
@@ -291,6 +295,8 @@ public class Troncon implements Parcelable{
         this.EIdeal = in.readFloat();
         this.EReel = in.readFloat();
         this.pas = in.readFloat();
+        this.polylineOptions=new PolylineOptions[1];
+        in.readTypedArray(polylineOptions,PolylineOptions.CREATOR);
     }
 
     static final Parcelable.Creator<Troncon> CREATOR = new Parcelable.Creator<Troncon>(){

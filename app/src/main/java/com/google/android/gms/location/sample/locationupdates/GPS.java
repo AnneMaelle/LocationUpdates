@@ -152,14 +152,12 @@ public class GPS extends AppCompatActivity implements
     DirectionsLeg[] myLegs;
     DirectionsStep[] mySteps;
     Vector<com.google.android.gms.maps.model.LatLng> debutStep;
-    int indiceCurrentStep;
     int indiceOldStep = -1;
     EncodedPolyline[] myPolylines;
     String[] instructions;
     int[] indexInstructions;
     Vector<com.google.android.gms.maps.model.LatLng> trajetPredit = new Vector<>();
-    Float[] notes2;
-    Troncon t;
+    Trajet trajetUtilisateur;
 
     boolean consigne100 = false;
 
@@ -201,6 +199,9 @@ public class GPS extends AppCompatActivity implements
         buildGoogleApiClient();
         createLocationRequest();
         buildLocationSettingsRequest();
+
+        //Crée le trajet
+        trajetUtilisateur = new Trajet();
 
         // Récupération des points de départ et arrivée pour l'itinéraire.
         Intent myIntent = getIntent();
@@ -496,16 +497,11 @@ public class GPS extends AppCompatActivity implements
                 setButtonsEnabledState();
             }
         });
-
-        /*for (int i=0;i<notes.size();i++){
-            notes2[i]=notes.get(i);
-        }
+        trajetUtilisateur.finDeTrajet();
 
         Intent myIntent = new Intent(this,BilanTrajet.class);
-        myIntent.putExtra("Longitudes",);
-        myIntent.putExtra("Latitudes",);
-        myIntent.putExtra("Scores",notes2);
-        startActivity(myIntent);*/
+        myIntent.putExtra("Trajet",trajetUtilisateur);
+        startActivity(myIntent);
     }
 
     @Override
@@ -695,7 +691,7 @@ public class GPS extends AppCompatActivity implements
 
 
     //Calcul de la vitesse
-    private void getSpeed(Location newLocation, Location veryOldLocation){
+    private void getSpeed(Location newLocation, Location veryOldLocation, Troncon t){
         double newTime = System.currentTimeMillis()/1000;
         double newLat = newLocation.getLatitude();
         double newLon = newLocation.getLongitude();
@@ -725,22 +721,24 @@ public class GPS extends AppCompatActivity implements
 
     public void onMapReady(GoogleMap map){
         myMap = map;
-        PolylineOptions polyOpt = new PolylineOptions();
+        PolylineOptions[] listePolylineOpt = new PolylineOptions[myPolylines.length];
 
         // Trace notre itinéraire
         indexInstructions = new int[myPolylines.length];
 
         for (int s=0; s<myPolylines.length;s++) {
 
+            PolylineOptions polylineOptions = new PolylineOptions();
             List<LatLng> poly = myPolylines[s].decodePath();
             for (int i = 0; i < poly.size(); i++) {
                 com.google.android.gms.maps.model.LatLng myLatLng = new com.google.android.gms.maps.model.LatLng(poly.get(i).lat, poly.get(i).lng);
                 trajetPredit.add(myLatLng);
-                polyOpt.add(myLatLng);
+                polylineOptions.add(myLatLng);
             }
             com.google.android.gms.maps.model.LatLng myEnd = new com.google.android.gms.maps.model.LatLng(mySteps[s].endLocation.lat,mySteps[s].endLocation.lng);
             trajetPredit.add(myEnd);
-            polyOpt.add(myEnd);
+            polylineOptions.add(myEnd);
+            listePolylineOpt[s]=polylineOptions;
         }
             
         // Place notre point de départ et notre point d'arrivée sur la carte
@@ -754,15 +752,17 @@ public class GPS extends AppCompatActivity implements
 
             System.out.println("\t\tRemplissage indexInstructions : " + myEnd);
             indexInstructions[i]=trajetPredit.indexOf(myEnd);
+
+            //Création du trajet
+            float d = (float) calculationByDistance(myStart.latitude, myStart.longitude, myEnd.latitude, myEnd.longitude);
+
+            Troncon t = new Troncon(0, d, 90, 70, 110, trajetPredit, listePolylineOpt[i]);
+            trajetUtilisateur.ajouterTroncon(t);
+            myMap.addPolyline(listePolylineOpt[i]);
         }
 
-        myMap.addPolyline(polyOpt);
         myMap.setMyLocationEnabled(true);
 
-        //Création du troncon
-        System.out.println("\t\ttrajetPredit"  + " : " + trajetPredit);
-        float d = (float) calculationByDistance(trajetPredit.get(trajetPredit.size()-1).latitude, trajetPredit.get(trajetPredit.size()-1).longitude, trajetPredit.get(0).latitude, trajetPredit.get(0).longitude);
-        t = new Troncon(0, d, 90, 70, 110, trajetPredit);
     }
                 
     @Override
@@ -859,8 +859,9 @@ public class GPS extends AppCompatActivity implements
             }
 
             procheConsigne(indiceStep);
+            Troncon t = trajetUtilisateur.getTroncons().get(indiceStep);
 
-            getSpeed(mCurrentLocation, oldLocation);
+            getSpeed(mCurrentLocation, oldLocation, t);
             conseil = t.conseil(currentSpeed, oldSpeed, indiceDernierePos, epsilon);
             this.donnerConseil(conseil);
             oldLocation = mCurrentLocation;

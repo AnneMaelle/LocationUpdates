@@ -27,7 +27,8 @@ public class BilanTrajet extends AppCompatActivity implements OnMapReadyCallback
     protected float[] myRoadLong;
     protected float[] myRoadLat;
     protected int myColor;
-
+    protected Trajet trajet;
+    protected PolylineOptions[] polylineOptions;
     Polyline myRoad ;
 
     @Override
@@ -45,10 +46,9 @@ public class BilanTrajet extends AppCompatActivity implements OnMapReadyCallback
 
         //Récupération des données enregistrées dans GPS
         Intent myIntent = getIntent();
-        myRoadLong = myIntent.getFloatArrayExtra("Longitudes");
-        myRoadLat = myIntent.getFloatArrayExtra("Latitudes");
-        myRoadScores = myIntent.getFloatArrayExtra("Scores");
-
+        trajet = myIntent.getParcelableExtra("Trajet");
+        myRoadScores = trajet.listeNoteVar;
+        polylineOptions = trajet.polylineOptions;
     }
 
     public void onMapReady(GoogleMap map){
@@ -58,6 +58,7 @@ public class BilanTrajet extends AppCompatActivity implements OnMapReadyCallback
         // Calcul du score et création de la Polyline
         myTotalScore += myRoadScores[0];
         for (int i = 1; i < myRoadScores.length; i++) {
+
             myTotalScore += myRoadScores[i];
             if (myRoadScores[i] > 5){
                 myColor = Color.GREEN ; //Hexadecimal code : (0xff00ff00)
@@ -68,9 +69,9 @@ public class BilanTrajet extends AppCompatActivity implements OnMapReadyCallback
             else if (5 <= myRoadScores[i] || myRoadScores[i] <= 5){
                 myColor = Color.GRAY; //Hexadecimal code : (0xffcccccc)
             }
-            myRoad = myMap.addPolyline(new PolylineOptions()
-                    .add(new LatLng(myRoadLat[i-1],myRoadLong[i-1]),new LatLng(myRoadLat[i],myRoadLong[i]))
-                    .color(myColor));
+
+            polylineOptions[i].color(myColor);
+            myRoad = myMap.addPolyline(polylineOptions[i]);
         }
     }
 }
